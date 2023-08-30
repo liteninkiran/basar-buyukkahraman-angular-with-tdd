@@ -12,7 +12,7 @@ describe('SignUpComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [SignUpComponent]
+            declarations: [SignUpComponent],
         }).compileComponents();
     });
 
@@ -85,6 +85,41 @@ describe('SignUpComponent', () => {
         const getLabelElement = (signUp: HTMLElement, id: string): HTMLLabelElement => {
             return signUp.querySelector(`label[for="${id}"]`) as HTMLLabelElement;
         }
+    });
+
+    describe('Interactions', () => {
+        it('Enables the button when the password and confirm password fields have same value', () => {
+            // Store things
+            const password = 'P!ssword';
+            const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
+            const passwordInput: HTMLInputElement = signUp.querySelector('input[id="password"]') as HTMLInputElement;
+            const confirmPasswordInput: HTMLInputElement = signUp.querySelector('input[id="passwordConfirm"]') as HTMLInputElement;
+            const button: HTMLButtonElement = signUp.querySelector('button') as HTMLButtonElement;
+
+            // Set password fields to same value
+            passwordInput.value = password;
+            confirmPasswordInput.value = password;
+
+            // Dispatch events & detect changes
+            passwordInput.dispatchEvent(new Event('input'));
+            confirmPasswordInput.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            // Expect button to be enabled
+            expect(button.disabled).toBeFalsy();
+
+            // Change password fields back to empty string
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+
+            // Dispatch events & detect changes
+            passwordInput.dispatchEvent(new Event('input'));
+            confirmPasswordInput.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            // Expect button to be disabled despite being the same value
+            expect(button.disabled).toBeTruthy();
+        });
     });
 
 });

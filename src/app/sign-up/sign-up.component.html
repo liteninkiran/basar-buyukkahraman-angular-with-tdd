@@ -7,11 +7,11 @@
 <input type="email" id="email" placeholder="Email">
 
 <label for="password">Password</label>
-<input type="password" id="password" placeholder="Password">
+<input type="password" id="password" placeholder="Password" (input)="onChangePassword($any($event))">
 
 <label for="passwordConfirm">Confirm Password</label>
-<input type="password" id="passwordConfirm" placeholder="Confirm Password">
+<input type="password" id="passwordConfirm" placeholder="Confirm Password" (input)="onChangeConfirmPassword($any($event))">
 
-<button disabled>
+<button [disabled]="disabled">
     Sign Up
 </button>
