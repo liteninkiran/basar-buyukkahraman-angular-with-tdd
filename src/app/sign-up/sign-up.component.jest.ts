@@ -1,15 +1,26 @@
-import { render, screen } from '@testing-library/angular';
+import { render, screen, waitFor } from '@testing-library/angular';
 import { SignUpComponent } from './sign-up.component';
-import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { HttpClientModule } from '@angular/common/http';
+import { SetupServerApi, setupServer } from 'msw/node';
+import { Path, RestHandler, rest } from 'msw';
 import userEvent from '@testing-library/user-event';
-import 'whatwg-fetch';
 
-const setup = async () => {
+let requestBody: IRequestBody = {} as IRequestBody;
+
+const setup = async (): Promise<void> => {
     await render(SignUpComponent, {
-        imports: [HttpClientTestingModule],
+        imports: [HttpClientModule],
     });
 };
+const url: Path = '/api/1.0/users';
+const postRequest: RestHandler = rest.post(url, (req, res, context) => {
+    requestBody = req.body as IRequestBody;
+    return res(context.status(200), context.json({}));
+});
+const server: SetupServerApi = setupServer(postRequest);
+
+beforeAll(() => server.listen());
+afterAll(() => server.close());
 
 interface IRequestBody {
     username: string;
@@ -96,12 +107,16 @@ describe('SignUpComponent', () => {
 
         it('sends username, email and password to backend after clicking the button', async () => {
             await setup();
-            let httpTestingController = TestBed.inject(HttpTestingController);
 
             // Store sign-up details
             const username = 'user1';
             const email = 'user1@mail.com';
             const password = 'P4ssword';
+            const expectedBody: IRequestBody = {
+                username: username,
+                password: password,
+                email: email,
+            };
 
             // Get elements
             const usernameInput = screen.getByLabelText('Username');
@@ -115,19 +130,10 @@ describe('SignUpComponent', () => {
             await userEvent.type(emailInput, email);
             await userEvent.type(passwordInput, password);
             await userEvent.type(confirmPasswordInput, password);
-
+            
             // Sign up
             await userEvent.click(button);
-
-            const req: TestRequest = httpTestingController.expectOne('/api/1.0/users');
-            const requestBody: IRequestBody = req.request.body;
-            const expectedBody: IRequestBody = {
-                username: username,
-                password: password,
-                email: email,
-            };
-
-            expect(requestBody).toEqual(expectedBody);
+            await waitFor(() => expect(requestBody).toEqual(expectedBody));
         });
 
     });
