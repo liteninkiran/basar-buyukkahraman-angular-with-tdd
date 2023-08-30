@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/angular';
+import { render, screen, waitFor } from '@testing-library/angular';
 import { SignUpComponent } from './sign-up.component';
-import userEvent from "@testing-library/user-event";
+import userEvent from '@testing-library/user-event';
+import 'whatwg-fetch';
 
 describe('SignUpComponent', () => {
 
@@ -78,6 +79,43 @@ describe('SignUpComponent', () => {
             await userEvent.clear(passwordInput);
             await userEvent.clear(passwordRepeatInput);
             expect(button).toBeDisabled();
-        })
+        });
+
+        it('sends username, email and password to backend after clicking the button', async () => {
+            const spy = jest.spyOn(window, 'fetch');
+            await render(SignUpComponent);
+
+            // Store sign-up details
+            const username = 'user1';
+            const email = 'user1@mail.com';
+            const password = 'P4ssword';
+
+            // Get elements
+            const usernameInput = screen.getByLabelText('Username');
+            const emailInput = screen.getByLabelText('Email');
+            const passwordInput = screen.getByLabelText('Password');
+            const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+            const button = screen.getByRole('button', { name: 'Sign Up' });
+
+            // Enter values
+            await userEvent.type(usernameInput, username);
+            await userEvent.type(emailInput, email);
+            await userEvent.type(passwordInput, password);
+            await userEvent.type(confirmPasswordInput, password);
+
+            // Sign up
+            await userEvent.click(button);
+
+            const args = spy.mock.calls[0];
+            const secondParam = args[1] as RequestInit;
+            const body = {
+                username: username,
+                password: password,
+                email: email,
+            };
+
+            expect(secondParam.body).toEqual(JSON.stringify(body));
+        });
+
     });
 });
