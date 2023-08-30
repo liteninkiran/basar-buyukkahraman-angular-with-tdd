@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignUpComponent } from './sign-up.component';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 export interface IConfig {
     id: string;
@@ -18,6 +19,7 @@ describe('SignUpComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             declarations: [SignUpComponent],
+            imports: [HttpClientTestingModule],
         }).compileComponents();
     });
 
@@ -127,9 +129,10 @@ describe('SignUpComponent', () => {
         });
 
         it('Sends username, email and password to backend after clicking the sign-up button', () => {
-            const spy = spyOn(window, 'fetch');
+            let httpTestingController: HttpTestingController = TestBed.inject(HttpTestingController);
 
             // Store sign-up details
+            const url = '/api/1.0/users';
             const username = 'user1';
             const email = 'user1@mail.com';
             const password = 'P4ssword';
@@ -155,15 +158,14 @@ describe('SignUpComponent', () => {
             // Sign up
             button.click();
 
-            const args = spy.calls.allArgs()[0];
-            const secondParam = args[1] as RequestInit;
-            const body = {
+            const req: TestRequest = httpTestingController.expectOne(url);
+            const requestBody: any = req.request.body;
+
+            expect(requestBody).toEqual({
                 username: username,
                 password: password,
                 email: email,
-            };
-
-            expect(secondParam.body).toEqual(JSON.stringify(body));
+            });
         });
 
     });

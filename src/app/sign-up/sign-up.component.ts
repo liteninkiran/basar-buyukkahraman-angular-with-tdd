@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -13,7 +14,7 @@ export class SignUpComponent implements OnInit {
     public username = '';
     public email = '';
 
-    constructor() { }
+    constructor(private httpClient: HttpClient) { }
 
     public ngOnInit(): void {
     }
@@ -38,23 +39,13 @@ export class SignUpComponent implements OnInit {
     }
 
     public onClickSignUp() {
-        const method = 'POST';
         const url = '/api/1.0/users';
         const body = {
             username: this.username,
             password: this.password,
             email: this.email,
         };
-        const bodyJson = JSON.stringify(body);
-        const headers = {
-            'Content-Type': 'application/json',
-        };
-        const fetchOptions = {
-            method: method,
-            body: bodyJson,
-            headers: headers,
-        };
-        fetch(url, fetchOptions);
+        this.httpClient.post(url, body).subscribe();
     }
 
     private setDisabled(): void {
