@@ -1,58 +1,72 @@
-import { render, screen, waitFor } from '@testing-library/angular';
+import { render, screen } from '@testing-library/angular';
 import { SignUpComponent } from './sign-up.component';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import userEvent from '@testing-library/user-event';
 import 'whatwg-fetch';
+
+const setup = async () => {
+    await render(SignUpComponent, {
+        imports: [HttpClientTestingModule],
+    });
+};
+
+interface IRequestBody {
+    username: string;
+    password: string;
+    email: string;
+};
 
 describe('SignUpComponent', () => {
 
     describe('Layout', () => {
 
         it('has Sign Up header', async () => {
-            await render(SignUpComponent);
+            await setup();
             const header = screen.getByRole('heading', { name: 'Sign Up' });
             expect(header).toBeInTheDocument();
         });
 
         it('has username input', async () => {
-            await render(SignUpComponent);
+            await setup();
             expect(screen.getByLabelText('Username')).toBeInTheDocument();
         });
 
         it('has email input', async () => {
-            await render(SignUpComponent);
+            await setup();
             expect(screen.getByLabelText('Email')).toBeInTheDocument();
         });
 
         it('has password input', async () => {
-            await render(SignUpComponent);
+            await setup();
             expect(screen.getByLabelText('Password')).toBeInTheDocument();
         });
 
         it('has password type for password input', async () => {
-            await render(SignUpComponent);
+            await setup();
             const input = screen.getByLabelText('Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
         it('has password repeat input', async () => {
-            await render(SignUpComponent);
+            await setup();
             expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
         });
 
         it('has password type for password repeat input', async () => {
-            await render(SignUpComponent);
+            await setup();
             const input = screen.getByLabelText('Confirm Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
         it('has Sign Up button', async () => {
-            await render(SignUpComponent);
+            await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeInTheDocument();
         });
 
         it('button is initially disabled', async () => {
-            await render(SignUpComponent);
+            await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeDisabled();
         });
@@ -61,8 +75,7 @@ describe('SignUpComponent', () => {
 
     describe('Interactions', () => {
         it('Enables the button when the password and confirm password fields have same value', async () => {
-            // Render the component
-            await render(SignUpComponent);
+            await setup();
 
             // Get elements
             const password = 'P!ssword';
@@ -82,8 +95,8 @@ describe('SignUpComponent', () => {
         });
 
         it('sends username, email and password to backend after clicking the button', async () => {
-            const spy = jest.spyOn(window, 'fetch');
-            await render(SignUpComponent);
+            await setup();
+            let httpTestingController = TestBed.inject(HttpTestingController);
 
             // Store sign-up details
             const username = 'user1';
@@ -106,15 +119,15 @@ describe('SignUpComponent', () => {
             // Sign up
             await userEvent.click(button);
 
-            const args = spy.mock.calls[0];
-            const secondParam = args[1] as RequestInit;
-            const body = {
+            const req: TestRequest = httpTestingController.expectOne('/api/1.0/users');
+            const requestBody: IRequestBody = req.request.body;
+            const expectedBody: IRequestBody = {
                 username: username,
                 password: password,
                 email: email,
             };
 
-            expect(secondParam.body).toEqual(JSON.stringify(body));
+            expect(requestBody).toEqual(expectedBody);
         });
 
     });
