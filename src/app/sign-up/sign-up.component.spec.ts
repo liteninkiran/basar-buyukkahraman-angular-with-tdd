@@ -6,6 +6,11 @@ export interface IConfig {
     text: string;
 };
 
+export interface IInputConfig {
+    input: HTMLInputElement,
+    setValue: string,
+};
+
 describe('SignUpComponent', () => {
     let component: SignUpComponent;
     let fixture: ComponentFixture<SignUpComponent>;
@@ -79,11 +84,11 @@ describe('SignUpComponent', () => {
         }
 
         const getInputElement = (signUp: HTMLElement, id: string): HTMLInputElement => {
-            return signUp.querySelector(`input[id="${id}"]`) as HTMLInputElement;
+            return signUp.querySelector(`input[id='${id}']`) as HTMLInputElement;
         }
 
         const getLabelElement = (signUp: HTMLElement, id: string): HTMLLabelElement => {
-            return signUp.querySelector(`label[for="${id}"]`) as HTMLLabelElement;
+            return signUp.querySelector(`label[for='${id}']`) as HTMLLabelElement;
         }
     });
 
@@ -120,6 +125,47 @@ describe('SignUpComponent', () => {
             // Expect button to be disabled despite being the same value
             expect(button.disabled).toBeTruthy();
         });
+
+        it('Sends username, email and password to backend after clicking the sign-up button', () => {
+            const spy = spyOn(window, 'fetch');
+
+            // Store sign-up details
+            const username = 'user1';
+            const email = 'user1@mail.com';
+            const password = 'P4ssword';
+
+            // Get elements
+            const signUp = fixture.nativeElement as HTMLElement;
+            const inputConfigs: IInputConfig[] = [
+                { input: signUp.querySelector('input[id="username"]') as HTMLInputElement, setValue: username },
+                { input: signUp.querySelector('input[id="email"]') as HTMLInputElement, setValue: email },
+                { input: signUp.querySelector('input[id="password"]') as HTMLInputElement, setValue: password },
+                { input: signUp.querySelector('input[id="passwordConfirm"]') as HTMLInputElement, setValue: password },
+            ];
+            const button: HTMLButtonElement = signUp.querySelector('button') as HTMLButtonElement;
+
+            // Enter values & dispatch
+            inputConfigs.map((config: IInputConfig) => {
+                config.input.value = config.setValue;
+                config.input.dispatchEvent(new Event('input'));
+            });
+
+            fixture.detectChanges();
+
+            // Sign up
+            button.click();
+
+            const args = spy.calls.allArgs()[0];
+            const secondParam = args[1] as RequestInit;
+            const body = {
+                username: username,
+                password: password,
+                email: email,
+            };
+
+            expect(secondParam.body).toEqual(JSON.stringify(body));
+        });
+
     });
 
 });
