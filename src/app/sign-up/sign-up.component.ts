@@ -14,6 +14,7 @@ export class SignUpComponent implements OnInit {
     public username = '';
     public email = '';
     public apiProgress: boolean = false;
+    public signUpSuccess = false;
 
     constructor(private httpClient: HttpClient) { }
 
@@ -58,7 +59,10 @@ export class SignUpComponent implements OnInit {
         };
         this.httpClient
             .post(url, body)
-            .subscribe(() => this.toggleApi());
+            .subscribe(() => {
+                this.toggleApi();
+                this.signUpSuccess = true;
+            });
     }
 
     private setDisabled(): void {

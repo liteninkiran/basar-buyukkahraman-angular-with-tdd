@@ -44,51 +44,51 @@ describe('SignUpComponent', (): void => {
 
     describe('Layout', (): void => {
 
-        it('has Sign Up header', async () => {
+        it('has Sign Up header', async (): Promise<void> => {
             await setup();
             const header = screen.getByRole('heading', { name: 'Sign Up' });
             expect(header).toBeInTheDocument();
         });
 
-        it('has username input', async () => {
+        it('has username input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Username')).toBeInTheDocument();
         });
 
-        it('has email input', async () => {
+        it('has email input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Email')).toBeInTheDocument();
         });
 
-        it('has password input', async () => {
+        it('has password input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Password')).toBeInTheDocument();
         });
 
-        it('has password type for password input', async () => {
+        it('has password type for password input', async (): Promise<void> => {
             await setup();
             const input = screen.getByLabelText('Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
-        it('has confirm password input', async () => {
+        it('has confirm password input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
         });
 
-        it('has password type for password repeat input', async () => {
+        it('has password type for password repeat input', async (): Promise<void> => {
             await setup();
             const input = screen.getByLabelText('Confirm Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
-        it('has Sign Up button', async () => {
+        it('has Sign Up button', async (): Promise<void> => {
             await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeInTheDocument();
         });
 
-        it('button is initially disabled', async () => {
+        it('button is initially disabled', async (): Promise<void> => {
             await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeDisabled();
@@ -128,7 +128,7 @@ describe('SignUpComponent', (): void => {
             await userEvent.type(confirmPasswordInput, password);
         }
 
-        it('Enables the button when the password and confirm password fields have same value', async () => {
+        it('Enables the button when the password and confirm password fields have same value', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
 
@@ -143,7 +143,7 @@ describe('SignUpComponent', (): void => {
             expect(button).toBeDisabled();
         });
 
-        it('Sends username, email and password to backend after clicking the button', async () => {
+        it('Sends username, email and password to backend after clicking the button', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
 
@@ -159,7 +159,7 @@ describe('SignUpComponent', (): void => {
             await waitFor(() => expect(requestBody).toEqual(expectedBody));
         });
 
-        it('Disables button when there is an ongoing API call', async () => {
+        it('Disables button when there is an ongoing API call', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
 
@@ -176,7 +176,7 @@ describe('SignUpComponent', (): void => {
             await waitFor(() => expect(counter).toBe(1));
         });
 
-        it('Displays spinner after clicking the submit button', async () => {
+        it('Displays spinner after clicking the submit button', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
 

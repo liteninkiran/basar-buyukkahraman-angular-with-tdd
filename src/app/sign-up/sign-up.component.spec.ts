@@ -106,6 +106,8 @@ describe('SignUpComponent', () => {
             password: 'input[id="password"]',
             confirmPassword: 'input[id="passwordConfirm"]',
             spinner: 'span[role="status"]',
+            alert: '.alert-success',
+            form: 'div[data-testid="form-sign-up"]',
         }
 
         // Common elements
@@ -156,7 +158,13 @@ describe('SignUpComponent', () => {
             fixture.detectChanges();
         }
 
-        it('Enables the button when the password and confirm password fields have same value', () => {
+        const makeAndResolveRequest = (): void => {
+            const req: TestRequest = httpTestingController.expectOne(url);
+            req.flush({});
+            fixture.detectChanges();
+        }
+
+        it('Enables the button when the password and confirm password fields have same value', (): void => {
             // Setup the form with user inputs
             setupForm();
 
@@ -170,7 +178,7 @@ describe('SignUpComponent', () => {
             expect(button.disabled).toBeTruthy();
         });
 
-        it('Sends username, email and password to backend after clicking the sign-up button', () => {
+        it('Sends username, email and password to backend after clicking the sign-up button', (): void => {
             // Setup the form with user inputs
             setupForm();
 
@@ -192,7 +200,7 @@ describe('SignUpComponent', () => {
             expect(requestBody).toEqual(expectedBody);
         });
 
-        it('Disables button when there is an ongoing API call', () => {
+        it('Disables button when there is an ongoing API call', (): void => {
             // Setup the form with user inputs
             setupForm();
 
@@ -209,7 +217,7 @@ describe('SignUpComponent', () => {
             expect(button.disabled).toBeTruthy();
         });
 
-        it('Displays spinner after clicking the submit button', () => {
+        it('Displays spinner after clicking the submit button', (): void => {
             // Setup the form with user inputs
             setupForm();
 
@@ -221,6 +229,41 @@ describe('SignUpComponent', () => {
 
             // Expect spinner to be shown
             expect(signUp.querySelector(selectors.spinner)).toBeTruthy();
+        });
+
+        it('Displays account activation notification after successful sign up request', (): void => {
+            // Setup the form with user inputs
+            setupForm();
+
+            // Expect success alert not to be shown
+            expect(signUp.querySelector(selectors.alert)).toBeFalsy();
+
+            // Sign up
+            clickSignUp();
+
+            // Make and resolve request
+            makeAndResolveRequest();
+
+            // Expect success alert to be shown
+            const message: HTMLElement = signUp.querySelector(selectors.alert) as HTMLElement;
+            expect(message.textContent).toContain('Please check your email to activate your account');
+        });
+
+        it('Hides sign up form after successful sign up request', (): void => {
+            // Setup the form with user inputs
+            setupForm();
+
+            // Expect the form to be shown
+            expect(signUp.querySelector(selectors.form)).toBeTruthy();
+
+            // Sign up
+            clickSignUp();
+
+            // Make and resolve request
+            makeAndResolveRequest();
+
+            // Expect the form not to be shown
+            expect(signUp.querySelector(selectors.form)).toBeFalsy();
         });
 
     });
