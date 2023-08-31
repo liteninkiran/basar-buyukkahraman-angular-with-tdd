@@ -209,7 +209,7 @@ describe('SignUpComponent', () => {
             expect(button.disabled).toBeTruthy();
         });
 
-        it('Displays spinner after clicking the submit', () => {
+        it('Displays spinner after clicking the submit button', () => {
             // Setup the form with user inputs
             setupForm();
 

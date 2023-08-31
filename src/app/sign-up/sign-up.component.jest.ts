@@ -2,35 +2,47 @@ import { render, screen, waitFor } from '@testing-library/angular';
 import { SignUpComponent } from './sign-up.component';
 import { HttpClientModule } from '@angular/common/http';
 import { SetupServerApi, setupServer } from 'msw/node';
-import { Path, RestHandler, rest } from 'msw';
+import { DefaultRequestBody, MockedResponse, Path, PathParams, ResponseComposition, ResponseResolver, RestContext, RestHandler, RestRequest, rest } from 'msw';
 import userEvent from '@testing-library/user-event';
-
-let requestBody: IRequestBody = {} as IRequestBody;
-
-const setup = async (): Promise<void> => {
-    await render(SignUpComponent, {
-        imports: [HttpClientModule],
-    });
-};
-const url: Path = '/api/1.0/users';
-const postRequest: RestHandler = rest.post(url, (req, res, context) => {
-    requestBody = req.body as IRequestBody;
-    return res(context.status(200), context.json({}));
-});
-const server: SetupServerApi = setupServer(postRequest);
-
-beforeAll(() => server.listen());
-afterAll(() => server.close());
 
 interface IRequestBody {
     username: string;
     password: string;
     email: string;
-};
+}
 
-describe('SignUpComponent', () => {
+let requestBody: IRequestBody = {} as IRequestBody;
+let counter = 0;
 
-    describe('Layout', () => {
+const setup = async (): Promise<void> => {
+    await render(SignUpComponent, {
+        imports: [HttpClientModule],
+    });
+}
+const url: Path = '/api/1.0/users';
+const resolver: ResponseResolver<
+        RestRequest<DefaultRequestBody, PathParams>,
+        RestContext,
+        DefaultRequestBody
+    > = (
+        req: RestRequest<DefaultRequestBody, PathParams>,
+        res: ResponseComposition<DefaultRequestBody>,
+        ctx: RestContext
+    ): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
+        requestBody = req.body as IRequestBody;
+        counter += 1;
+        return res(ctx.status(200), ctx.json({}));
+    }
+const postRequest: RestHandler = rest.post(url, resolver);
+const server: SetupServerApi = setupServer(postRequest);
+
+beforeEach((): void => { counter = 0; });
+beforeAll((): void => server.listen());
+afterAll((): void => server.close());
+
+describe('SignUpComponent', (): void => {
+
+    describe('Layout', (): void => {
 
         it('has Sign Up header', async () => {
             await setup();
@@ -59,7 +71,7 @@ describe('SignUpComponent', () => {
             expect(input).toHaveAttribute('type', 'password');
         });
 
-        it('has password repeat input', async () => {
+        it('has confirm password input', async () => {
             await setup();
             expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
         });
@@ -84,56 +96,98 @@ describe('SignUpComponent', () => {
 
     });
 
-    describe('Interactions', () => {
-        it('Enables the button when the password and confirm password fields have same value', async () => {
+    describe('Interactions', (): void => {
+        // Sign-up details
+        const username = 'user1';
+        const email = 'user1@mail.com';
+        const password = 'P4ssword';
+
+        let usernameInput: HTMLInputElement;
+        let emailInput: HTMLInputElement;
+        let passwordInput: HTMLInputElement;
+        let confirmPasswordInput: HTMLInputElement;
+        let button: HTMLButtonElement;
+
+        const setupForm = async () => {
+            // Global setup
             await setup();
 
-            // Get elements
-            const password = 'P!ssword';
-            const passwordInput = screen.getByLabelText('Password');
-            const passwordRepeatInput = screen.getByLabelText('Confirm Password');
-            const button = screen.getByRole('button', { name: 'Sign Up' });
+            // Store input elements
+            usernameInput = screen.getByLabelText('Username');
+            emailInput = screen.getByLabelText('Email');
+            passwordInput = screen.getByLabelText('Password');
+            confirmPasswordInput = screen.getByLabelText('Confirm Password');
 
-            // Enter text in inputs
+            // Store button element
+            button = screen.getByRole('button', { name: 'Sign Up' });
+
+            // Enter sign-up details
+            await userEvent.type(usernameInput, username);
+            await userEvent.type(emailInput, email);
             await userEvent.type(passwordInput, password);
-            await userEvent.type(passwordRepeatInput, password);
+            await userEvent.type(confirmPasswordInput, password);
+        }
+
+        it('Enables the button when the password and confirm password fields have same value', async () => {
+            // Setup the form with user inputs
+            await setupForm();
+
+            // Expect button to be enabled (because passwords match and have non-zero lengths)
             expect(button).toBeEnabled();
 
             // Reset input text
             await userEvent.clear(passwordInput);
-            await userEvent.clear(passwordRepeatInput);
+            await userEvent.clear(confirmPasswordInput);
+
+            // Expect button to be disabled (because passwords have zero lengths)
             expect(button).toBeDisabled();
         });
 
-        it('sends username, email and password to backend after clicking the button', async () => {
-            await setup();
+        it('Sends username, email and password to backend after clicking the button', async () => {
+            // Setup the form with user inputs
+            await setupForm();
 
-            // Store sign-up details
-            const username = 'user1';
-            const email = 'user1@mail.com';
-            const password = 'P4ssword';
+            // Sign up
+            await userEvent.click(button);
+
+            // Expect the request body to be as expected
             const expectedBody: IRequestBody = {
                 username: username,
                 password: password,
                 email: email,
             };
+            await waitFor(() => expect(requestBody).toEqual(expectedBody));
+        });
 
-            // Get elements
-            const usernameInput = screen.getByLabelText('Username');
-            const emailInput = screen.getByLabelText('Email');
-            const passwordInput = screen.getByLabelText('Password');
-            const confirmPasswordInput = screen.getByLabelText('Confirm Password');
-            const button = screen.getByRole('button', { name: 'Sign Up' });
+        it('Disables button when there is an ongoing API call', async () => {
+            // Setup the form with user inputs
+            await setupForm();
 
-            // Enter values
-            await userEvent.type(usernameInput, username);
-            await userEvent.type(emailInput, email);
-            await userEvent.type(passwordInput, password);
-            await userEvent.type(confirmPasswordInput, password);
-            
             // Sign up
             await userEvent.click(button);
-            await waitFor(() => expect(requestBody).toEqual(expectedBody));
+
+            // Expect button to be disabled (because request has been submitted but response not yet received)
+            expect(button).toBeDisabled();
+
+            // Try and sign up again
+            await userEvent.click(button);
+
+            // Expect only one call to API
+            await waitFor(() => expect(counter).toBe(1));
+        });
+
+        it('Displays spinner after clicking the submit button', async () => {
+            // Setup the form with user inputs
+            await setupForm();
+
+            // Expect spinner not to be shown
+            expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+            // Sign up
+            await userEvent.click(button);
+
+            // Expect spinner to be shown
+            expect(screen.queryByRole('status')).toBeInTheDocument();
         });
 
     });
