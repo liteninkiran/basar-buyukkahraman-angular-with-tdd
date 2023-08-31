@@ -4,6 +4,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { SetupServerApi, setupServer } from 'msw/node';
 import { DefaultRequestBody, MockedResponse, Path, PathParams, ResponseComposition, ResponseResolver, RestContext, RestHandler, RestRequest, rest } from 'msw';
 import userEvent from '@testing-library/user-event';
+import { AlertComponent } from '../shared/alert/alert.component';
+import { ButtonComponent } from '../shared/button/button.component';
 
 interface IRequestBody {
     username: string;
@@ -17,6 +19,10 @@ let counter = 0;
 const setup = async (): Promise<void> => {
     await render(SignUpComponent, {
         imports: [HttpClientModule],
+        declarations: [
+            AlertComponent,
+            ButtonComponent,
+        ],
     });
 }
 const url: Path = '/api/1.0/users';
