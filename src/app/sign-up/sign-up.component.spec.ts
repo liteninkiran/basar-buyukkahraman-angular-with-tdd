@@ -253,7 +253,7 @@ describe('SignUpComponent', () => {
             // Setup the form with user inputs
             setupForm();
 
-            // Expect the form to be shown
+            // Expect the sign-up form to be shown
             expect(signUp.querySelector(selectors.form)).toBeTruthy();
 
             // Sign up
@@ -262,7 +262,7 @@ describe('SignUpComponent', () => {
             // Make and resolve request
             makeAndResolveRequest();
 
-            // Expect the form not to be shown
+            // Expect the sign-up form not to be shown
             expect(signUp.querySelector(selectors.form)).toBeFalsy();
         });
 

@@ -21,14 +21,14 @@ const setup = async (): Promise<void> => {
 }
 const url: Path = '/api/1.0/users';
 const resolver: ResponseResolver<
-        RestRequest<DefaultRequestBody, PathParams>,
-        RestContext,
-        DefaultRequestBody
-    > = (
-        req: RestRequest<DefaultRequestBody, PathParams>,
-        res: ResponseComposition<DefaultRequestBody>,
-        ctx: RestContext
-    ): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
+    RestRequest<DefaultRequestBody, PathParams>,
+    RestContext,
+    DefaultRequestBody
+> = (
+    req: RestRequest<DefaultRequestBody, PathParams>,
+    res: ResponseComposition<DefaultRequestBody>,
+    ctx: RestContext
+): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
         requestBody = req.body as IRequestBody;
         counter += 1;
         return res(ctx.status(200), ctx.json({}));
@@ -101,6 +101,7 @@ describe('SignUpComponent', (): void => {
         const username = 'user1';
         const email = 'user1@mail.com';
         const password = 'P4ssword';
+        const alertText = 'Please check your email to activate your account';
 
         let usernameInput: HTMLInputElement;
         let emailInput: HTMLInputElement;
@@ -188,6 +189,41 @@ describe('SignUpComponent', (): void => {
 
             // Expect spinner to be shown
             expect(screen.queryByRole('status')).toBeInTheDocument();
+        });
+
+        it('Displays account activation notification after successful sign up request', async (): Promise<void> => {
+            // Setup the form with user inputs
+            await setupForm();
+
+            // Expect success alert not to be shown
+            expect(screen.queryByText(alertText)).not.toBeInTheDocument();
+
+            // Sign up
+            await userEvent.click(button);
+
+            // Expect success alert to be shown
+            const text = await screen.findByText(alertText);
+            expect(text).toBeInTheDocument();
+        });
+
+        it('Hides sign up form after successful sign up request', async (): Promise<void> => {
+            // Setup the form with user inputs
+            await setupForm();
+
+            // Find the sign-up form
+            const form = screen.getByTestId('form-sign-up');
+
+            // Expect the sign-up form to be shown
+            expect(form).toBeInTheDocument();
+
+            // Sign up
+            await userEvent.click(button);
+
+            // Find alert
+            await screen.findByText(alertText);
+
+            // Expect the sign-up form not to be shown
+            expect(form).not.toBeInTheDocument();
         });
 
     });
