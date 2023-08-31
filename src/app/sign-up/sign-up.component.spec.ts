@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignUpComponent } from './sign-up.component';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { SharedModule } from '../shared/shared.module';
+import { FormsModule } from '@angular/forms';
 
 export interface IConfig {
     id: string;
@@ -25,6 +26,7 @@ describe('SignUpComponent', () => {
             imports: [
                 HttpClientTestingModule,
                 SharedModule,
+                FormsModule,
             ],
         }).compileComponents();
     });
@@ -123,13 +125,15 @@ describe('SignUpComponent', () => {
         let inputConfigs: IInputConfig[];
 
         // Run before each test
-        const setupForm = (): void => {
+        const setupForm = async (): Promise<void> => {
             // Set testing controller
             httpTestingController = TestBed.inject(HttpTestingController);
 
             // Store elements 
             signUp = fixture.nativeElement as HTMLElement;
             button = signUp.querySelector('button') as HTMLButtonElement;
+
+            await fixture.whenStable();
 
             // Store input elements
             inputConfigs = [
@@ -170,9 +174,9 @@ describe('SignUpComponent', () => {
             fixture.detectChanges();
         }
 
-        it('Enables the button when the password and confirm password fields have same value', (): void => {
+        it('Enables the button when the password and confirm password fields have same value', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Expect button to be enabled
             expect(button.disabled).toBeFalsy();
@@ -184,9 +188,9 @@ describe('SignUpComponent', () => {
             expect(button.disabled).toBeTruthy();
         });
 
-        it('Sends username, email and password to backend after clicking the sign-up button', (): void => {
+        it('Sends username, email and password to backend after clicking the sign-up button', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Sign up
             clickSignUp();
@@ -206,9 +210,9 @@ describe('SignUpComponent', () => {
             expect(requestBody).toEqual(expectedBody);
         });
 
-        it('Disables button when there is an ongoing API call', (): void => {
+        it('Disables button when there is an ongoing API call', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Sign up
             clickSignUp();
@@ -223,9 +227,9 @@ describe('SignUpComponent', () => {
             expect(button.disabled).toBeTruthy();
         });
 
-        it('Displays spinner after clicking the submit button', (): void => {
+        it('Displays spinner after clicking the submit button', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Expect spinner to be hidden
             expect(signUp.querySelector(selectors.spinner)).toBeFalsy();
@@ -237,9 +241,9 @@ describe('SignUpComponent', () => {
             expect(signUp.querySelector(selectors.spinner)).toBeTruthy();
         });
 
-        it('Displays account activation notification after successful sign up request', (): void => {
+        it('Displays account activation notification after successful sign up request', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Expect success alert not to be shown
             expect(signUp.querySelector(selectors.alert)).toBeFalsy();
@@ -255,9 +259,9 @@ describe('SignUpComponent', () => {
             expect(message.textContent).toContain('Please check your email to activate your account');
         });
 
-        it('Hides sign up form after successful sign up request', (): void => {
+        it('Hides sign up form after successful sign up request', async (): Promise<void> => {
             // Setup the form with user inputs
-            setupForm();
+            await setupForm();
 
             // Expect the sign-up form to be shown
             expect(signUp.querySelector(selectors.form)).toBeTruthy();

@@ -6,19 +6,19 @@
         <form class="card-body" (submit)="onClickSignUp(); $event.preventDefault()">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input id="username" class="form-control" (input)="onChangeUsername($any($event))" />
+                <input id="username" class="form-control" name="username" [(ngModel)]="username">
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input id="email" class="form-control" (input)="onChangeEmail($any($event))" />
+                <input id="email" class="form-control" name="email" [(ngModel)]="email">
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input id="password" class="form-control" type="password" (input)="onChangePassword($any($event))" />
+                <input id="password" class="form-control" type="password" name="password" [(ngModel)]="password" (input)="onChange()">
             </div>
             <div class="mb-3">
                 <label for="passwordConfirm" class="form-label">Confirm Password</label>
-                <input id="passwordConfirm" class="form-control" type="password" (input)="onChangeConfirmPassword($any($event))">
+                <input id="passwordConfirm" class="form-control" type="password" name="confirmPassword" [(ngModel)]="confirmPassword" (input)="onChange()">
             </div>
             <div class="text-center">
                 <app-button [disabled]="disabled" [apiProgress]="apiProgress">

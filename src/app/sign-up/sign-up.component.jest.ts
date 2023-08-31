@@ -3,8 +3,9 @@ import { SignUpComponent } from './sign-up.component';
 import { HttpClientModule } from '@angular/common/http';
 import { SetupServerApi, setupServer } from 'msw/node';
 import { DefaultRequestBody, MockedResponse, Path, PathParams, ResponseComposition, ResponseResolver, RestContext, RestHandler, RestRequest, rest } from 'msw';
-import userEvent from '@testing-library/user-event';
 import { SharedModule } from '../shared/shared.module';
+import { FormsModule } from '@angular/forms';
+import userEvent from '@testing-library/user-event';
 
 interface IRequestBody {
     username: string;
@@ -20,6 +21,7 @@ const setup = async (): Promise<void> => {
         imports: [
             HttpClientModule,
             SharedModule,
+            FormsModule,
         ],
     });
 }

@@ -21,28 +21,13 @@ export class SignUpComponent implements OnInit {
     public ngOnInit(): void {
     }
 
-    public onChangePassword(event: InputEvent): void {
-        const target: HTMLInputElement = event.target as HTMLInputElement;
-        this.password = target.value;
-        this.setDisabled();
-    }
-
-    public onChangeConfirmPassword(event: InputEvent): void {
-        this.confirmPassword = (event.target as HTMLInputElement).value;
-        this.setDisabled();
-    }
-
-    public onChangeUsername(event: InputEvent) {
-        this.username = (event.target as HTMLInputElement).value;
-    }
-
-    public onChangeEmail(event: InputEvent) {
-        this.email = (event.target as HTMLInputElement).value;
-    }
-
     public onClickSignUp() {
         this.toggleApi();
         this.signUp();
+    }
+
+    public onChange() {
+        this.setDisabled();
     }
 
     private toggleApi(): void {
