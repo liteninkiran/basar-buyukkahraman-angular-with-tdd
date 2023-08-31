@@ -13,6 +13,7 @@ export class SignUpComponent implements OnInit {
     public confirmPassword = '';
     public username = '';
     public email = '';
+    public apiProgress: boolean = false;
 
     constructor(private httpClient: HttpClient) { }
 
@@ -39,16 +40,38 @@ export class SignUpComponent implements OnInit {
     }
 
     public onClickSignUp() {
+        this.toggleApi();
+        this.signUp();
+    }
+
+    private toggleApi(): void {
+        this.apiProgress = !this.apiProgress;
+        this.setDisabled();
+    }
+
+    private signUp(): void {
         const url = '/api/1.0/users';
         const body = {
             username: this.username,
             password: this.password,
             email: this.email,
         };
-        this.httpClient.post(url, body).subscribe();
+        this.httpClient
+            .post(url, body)
+            .subscribe(() => this.toggleApi());
     }
 
     private setDisabled(): void {
-        this.disabled = this.password !== this.confirmPassword || (this.password.length + this.confirmPassword.length === 0);
+        const inputConfig = {
+            checks: [
+                this.password === this.confirmPassword,
+                this.password.length + this.confirmPassword.length > 0,
+                !this.apiProgress,
+            ],
+            enabled: false,
+        };
+        const passingChecks = inputConfig.checks.filter(Boolean);
+        inputConfig.enabled = passingChecks.length === inputConfig.checks.length;
+        this.disabled = !inputConfig.enabled;
     }
 }

@@ -21,7 +21,8 @@
                 <input id="passwordConfirm" class="form-control" type="password" (input)="onChangeConfirmPassword($any($event))">
             </div>
             <div class="text-center">
-                <button class="btn btn-primary" [disabled]="disabled" type="submit">
+                <button class="btn btn-primary" [disabled]="disabled">
+                    <span *ngIf="apiProgress" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     Sign Up
                 </button>
             </div>
