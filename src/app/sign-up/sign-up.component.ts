@@ -58,7 +58,6 @@ export class SignUpComponent implements OnInit {
             email: this.email,
         };
         this.userService.signUp(body).subscribe((res) => {
-            console.log(res);
             this.toggleApi();
             this.signUpSuccess = true;
         });

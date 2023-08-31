@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignUpComponent } from './sign-up.component';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
-import { AlertComponent } from '../shared/alert/alert.component';
-import { ButtonComponent } from '../shared/button/button.component';
+import { SharedModule } from '../shared/shared.module';
 
 export interface IConfig {
     id: string;
@@ -22,10 +21,11 @@ describe('SignUpComponent', () => {
         await TestBed.configureTestingModule({
             declarations: [
                 SignUpComponent,
-                AlertComponent,
-                ButtonComponent,
             ],
-            imports: [HttpClientTestingModule],
+            imports: [
+                HttpClientTestingModule,
+                SharedModule,
+            ],
         }).compileComponents();
     });
 
