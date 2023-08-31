@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { UserService } from '../core/user.service';
 
 @Component({
     selector: 'app-sign-up',
@@ -16,7 +16,7 @@ export class SignUpComponent implements OnInit {
     public apiProgress: boolean = false;
     public signUpSuccess = false;
 
-    constructor(private httpClient: HttpClient) { }
+    constructor(private userService: UserService) { }
 
     public ngOnInit(): void {
     }
@@ -57,12 +57,11 @@ export class SignUpComponent implements OnInit {
             password: this.password,
             email: this.email,
         };
-        this.httpClient
-            .post(url, body)
-            .subscribe(() => {
-                this.toggleApi();
-                this.signUpSuccess = true;
-            });
+        this.userService.signUp(body).subscribe((res) => {
+            console.log(res);
+            this.toggleApi();
+            this.signUpSuccess = true;
+        });
     }
 
     private setDisabled(): void {
