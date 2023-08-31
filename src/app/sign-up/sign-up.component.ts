@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../core/user.service';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
     selector: 'app-sign-up',
@@ -9,12 +10,14 @@ import { UserService } from '../core/user.service';
 export class SignUpComponent implements OnInit {
 
     public disabled = true;
-    public password = '';
-    public confirmPassword = '';
-    public username = '';
-    public email = '';
     public apiProgress: boolean = false;
     public signUpSuccess = false;
+    public form = new FormGroup({
+        username: new FormControl(''),
+        email: new FormControl(''),
+        password: new FormControl(''),
+        confirmPassword: new FormControl(''),
+    });
 
     constructor(private userService: UserService) { }
 
@@ -36,12 +39,8 @@ export class SignUpComponent implements OnInit {
     }
 
     private signUp(): void {
-        const url = '/api/1.0/users';
-        const body = {
-            username: this.username,
-            password: this.password,
-            email: this.email,
-        };
+        const body: any = this.form.value;
+        delete body.confirmPassword;
         this.userService.signUp(body).subscribe((res) => {
             this.toggleApi();
             this.signUpSuccess = true;
@@ -49,10 +48,12 @@ export class SignUpComponent implements OnInit {
     }
 
     private setDisabled(): void {
+        const password = this.form.get('password')?.value;
+        const confirmPassword = this.form.get('confirmPassword')?.value;
         const inputConfig = {
             checks: [
-                this.password === this.confirmPassword,
-                this.password.length + this.confirmPassword.length > 0,
+                password === confirmPassword,
+                password.length + confirmPassword.length > 0,
                 !this.apiProgress,
             ],
             enabled: false,

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignUpComponent } from './sign-up.component';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { SharedModule } from '../shared/shared.module';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 
 export interface IConfig {
     id: string;
@@ -26,7 +26,7 @@ describe('SignUpComponent', () => {
             imports: [
                 HttpClientTestingModule,
                 SharedModule,
-                FormsModule,
+                ReactiveFormsModule,
             ],
         }).compileComponents();
     });

@@ -4,7 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { SetupServerApi, setupServer } from 'msw/node';
 import { DefaultRequestBody, MockedResponse, Path, PathParams, ResponseComposition, ResponseResolver, RestContext, RestHandler, RestRequest, rest } from 'msw';
 import { SharedModule } from '../shared/shared.module';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import userEvent from '@testing-library/user-event';
 
 interface IRequestBody {
@@ -21,7 +21,7 @@ const setup = async (): Promise<void> => {
         imports: [
             HttpClientModule,
             SharedModule,
-            FormsModule,
+            ReactiveFormsModule,
         ],
     });
 }
