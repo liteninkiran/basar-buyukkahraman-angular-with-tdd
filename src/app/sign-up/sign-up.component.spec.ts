@@ -153,6 +153,7 @@ describe('SignUpComponent', () => {
             inputConfigs.map((config: IInputConfig) => {
                 config.input.value = config.setValue;
                 config.input.dispatchEvent(new Event('input'));
+                config.input.dispatchEvent(new Event('blur'));
             });
 
             // Refresh component
@@ -197,6 +198,7 @@ describe('SignUpComponent', () => {
         it('Sends username, email and password to backend after clicking the sign-up button', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
+            fixture.detectChanges();
 
             // Sign up
             clickSignUp();
@@ -335,6 +337,26 @@ describe('SignUpComponent', () => {
                 // Expect correct validation message to be shown
                 expect(validationElement.textContent).toContain(error);
             });
+        });
+
+        it(`Displays the 'Email in use' error when email is not unique`, () => {
+            let httpTestingController = TestBed.inject(HttpTestingController);
+            const signUp = fixture.nativeElement as HTMLElement;
+            expect(signUp.querySelector(`div[data-testid="email-validation"]`)).toBeNull();
+            const input = signUp.querySelector(`input[id="email"]`) as HTMLInputElement;
+            input.value = 'non-unique-email@mail.com';
+            input.dispatchEvent(new Event('input'));
+            input.dispatchEvent(new Event('blur'));
+            const request = httpTestingController.expectOne(({ url, method, body }) => {
+                if (url === '/api/1.0/user/email' && method === 'POST') {
+                    return body.email === "non-unique-email@mail.com"
+                }
+                return false;
+            })
+            request.flush({});
+            fixture.detectChanges();
+            const validationElement = signUp.querySelector(`div[data-testid="email-validation"]`);
+            expect(validationElement?.textContent).toContain('Email in use');
         });
     });
 });

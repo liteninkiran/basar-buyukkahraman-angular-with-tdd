@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../core/user.service';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AbstractControlOptions, FormControl, FormGroup, Validators } from '@angular/forms';
 import { passwordMatchValidator } from './password-match.validator';
+import { UniqueEmailValidator } from './unique-email.validator';
+
+interface IValidatorOptions {
+    username: AbstractControlOptions;
+    email: AbstractControlOptions;
+    password: AbstractControlOptions;
+    form: AbstractControlOptions;
+}
 
 @Component({
     selector: 'app-sign-up',
@@ -13,14 +21,39 @@ export class SignUpComponent implements OnInit {
     public disabled = true;
     public apiProgress: boolean = false;
     public signUpSuccess = false;
+    public options: IValidatorOptions = {
+        username: {
+            validators: [
+                Validators.required,
+                Validators.minLength(4),
+            ],
+        },
+        email: {
+            validators: [
+                Validators.required,
+                Validators.email,
+            ],
+            asyncValidators: [
+                this.uniqueEmailValidator.validate.bind(this.uniqueEmailValidator),
+            ],
+            updateOn: 'blur',
+        },
+        password: {
+            validators: [
+                Validators.required,
+                Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/),
+            ],
+        },
+        form: {
+            validators: passwordMatchValidator,
+        },
+    }
     public form = new FormGroup({
-        username: new FormControl('', [Validators.required, Validators.minLength(4)]),
-        email: new FormControl('', [Validators.required, Validators.email]),
-        password: new FormControl('', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)]),
+        username: new FormControl('', this.options.username),
+        email: new FormControl('', this.options.email),
+        password: new FormControl('', this.options.password),
         confirmPassword: new FormControl(''),
-    }, {
-        validators: passwordMatchValidator,
-    });
+    }, this.options.form);
 
     get usernameError(): string | undefined {
         const field: AbstractControl = this.form.get('username') as AbstractControl;
@@ -32,14 +65,18 @@ export class SignUpComponent implements OnInit {
             : undefined;
     }
 
-    get emailError(): string | undefined {
-        const field: AbstractControl = this.form.get('email') as AbstractControl;
-        const hasErrors: boolean = (field.errors && (field.touched || field.dirty)) as boolean;
-        return hasErrors
-            ? field.errors && field.errors['required']
-                ? 'Email is required'
-                : 'Invalid email address'
-            : undefined;
+    get emailError() {
+        const field = this.form.get('email');
+        if ((field?.errors && (field?.touched || field?.dirty))) {
+            if (field.errors['required']) {
+                return 'Email is required';
+            } else if (field.errors['email']) {
+                return 'Invalid email address';
+            } else if (field.errors['uniqueEmail']) {
+                return 'Email in use';
+            }
+        }
+        return;
     }
 
     get passwordError(): string | undefined {
@@ -62,7 +99,10 @@ export class SignUpComponent implements OnInit {
             : undefined;
     }
 
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService,
+        private uniqueEmailValidator: UniqueEmailValidator,
+    ) { }
 
     public ngOnInit(): void {
     }

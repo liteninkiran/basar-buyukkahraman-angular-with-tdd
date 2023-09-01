@@ -18,4 +18,8 @@ export class UserService {
     public signUp(body: IBody): Observable<any> {
         return this.httpClient.post('/api/1.0/users', body);
     }
+
+    public isEmailTaken(value: string): Observable<any> {
+        return this.httpClient.post('/api/1.0/user/email', { email: value });
+    }
 }
