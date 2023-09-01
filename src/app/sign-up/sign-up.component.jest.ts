@@ -233,4 +233,44 @@ describe('SignUpComponent', (): void => {
         });
 
     });
+
+    describe('Validation', (): void => {
+        it('displays Username is required message when username is null', async (): Promise<void> => {
+            // Setup component
+            await setup();
+
+            // Set variables
+            const message = 'Username is required';
+            const usernameInput = screen.getByLabelText('Username');
+
+            // Expect validation messages not to be shown
+            expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+            // Enter & exit the input element
+            await userEvent.click(usernameInput);
+            await userEvent.tab();
+
+            // Expect correct validation message to show
+            expect(screen.queryByText(message)).toBeInTheDocument();
+        })
+        it('displays length error when username is less than 4 characters', async (): Promise<void> => {
+            // Setup component
+            await setup();
+
+            // Set variables
+            const message = 'Username must be at least 4 characters long';
+            const usernameInput = screen.getByLabelText('Username');
+
+            // Expect validation messages not to be shown
+            expect(screen.queryByText(message)).not.toBeInTheDocument();
+
+            // Enter an invalid value for username
+            await userEvent.type(usernameInput, '123');
+            await userEvent.tab();
+
+            // Expect correct validation message to show
+            expect(screen.queryByText(message)).toBeInTheDocument();
+        });
+    });
+
 });

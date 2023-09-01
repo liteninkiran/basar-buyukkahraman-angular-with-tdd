@@ -316,8 +316,8 @@ describe('SignUpComponent', () => {
             // Store username input
             const usernameInput = signUp.querySelector(selectors.username) as HTMLInputElement;
 
-            // Enter a value for username
-            usernameInput.value = "123";
+            // Enter an invalid value for username
+            usernameInput.value = '123';
             usernameInput.dispatchEvent(new Event('input'));
             usernameInput.dispatchEvent(new Event('blur'));
             fixture.detectChanges();
