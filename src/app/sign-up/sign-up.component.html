@@ -12,16 +12,11 @@
             <!-- Username -->
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input id="username" class="form-control" formControlName="username">
+                <input id="username" class="form-control" formControlName="username" [class.is-invalid]="usernameError">
 
                 <!-- Validation -->
-                <div data-testid="username-validation" *ngIf="form.get('username')?.errors && (form.get('username')?.touched || form.get('username')?.dirty)">
-                    <div *ngIf="form.get('username')?.errors?.['required']">
-                        Username is required
-                    </div>
-                    <div *ngIf="form.get('username')?.errors?.['minlength']">
-                        Username must be at least 4 characters long
-                    </div>
+                <div data-testid="username-validation" *ngIf="usernameError" class="invalid-feedback">
+                    {{ usernameError }}
                 </div>
             </div>
 

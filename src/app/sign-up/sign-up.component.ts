@@ -19,6 +19,16 @@ export class SignUpComponent implements OnInit {
         confirmPassword: new FormControl(''),
     });
 
+    get usernameError(): string | undefined {
+        const field = this.form.get('username');
+        const hasErrors = field?.errors && (field?.touched || field?.dirty);
+        return hasErrors
+            ? field.errors['required']
+                ? 'Username is required'
+                : 'Username must be at least 4 characters long'
+            : undefined;
+    }
+
     constructor(private userService: UserService) { }
 
     public ngOnInit(): void {
