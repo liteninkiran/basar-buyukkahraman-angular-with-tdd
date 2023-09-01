@@ -4,14 +4,20 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 import { SharedModule } from '../shared/shared.module';
 import { ReactiveFormsModule } from '@angular/forms';
 
-export interface IConfig {
+interface IConfig {
     id: string;
     text: string;
 };
 
-export interface IInputConfig {
+interface IInputConfig {
     input: HTMLInputElement,
     setValue: string,
+};
+
+interface ITestCase {
+    field: string,
+    value: string,
+    error: string,
 };
 
 describe('SignUpComponent', () => {
@@ -279,54 +285,37 @@ describe('SignUpComponent', () => {
     });
 
     describe('Validation', (): void => {
-        const selectors = {
-            usernameValidation: 'div[data-testid="username-validation"]',
-            username: 'input[id="username"]',
-        }
 
-        it('Displays Username is required message when username is null', (): void => {
-            // Store component
-            const signUp = fixture.nativeElement as HTMLElement;
+        const testCases: ITestCase[] = [
+            { field: 'username', value: '', error: 'Username is required' },
+            { field: 'username', value: '123', error: 'Username must be at least 4 characters long' },
+        ];
 
-            // Expect validation messages not to be shown
-            expect(signUp.querySelector(selectors.usernameValidation)).toBeNull();
+        testCases.forEach(({ field, value, error }): void => {
+            const testDescription = `Displays the '${error}' error when ${field} is '${value}'`;
+            const validationSelector = `div[data-testid="${field}-validation"]`;
+            const inputSelector = `input[id="${field}"]`;
 
-            // Store username input
-            const usernameInput = signUp.querySelector(selectors.username) as HTMLInputElement;
+            it(testDescription, (): void => {
+                // Store elements
+                const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
+                const input: HTMLInputElement = signUp.querySelector(inputSelector) as HTMLInputElement;
 
-            // Enter & exit the input element
-            usernameInput.dispatchEvent(new Event('focus'));
-            usernameInput.dispatchEvent(new Event('blur'));
-            fixture.detectChanges();
+                // Expect validation messages not to be shown
+                expect(signUp.querySelector(validationSelector)).toBeNull();
 
-            // Store validation element
-            const validationElement: HTMLDivElement = signUp.querySelector(selectors.usernameValidation) as HTMLDivElement;
+                // Enter some invalid data
+                input.value = value;
+                input.dispatchEvent(new Event('input'));
+                input.dispatchEvent(new Event('blur'));
+                fixture.detectChanges();
 
-            // Expect correct validation message to show
-            expect(validationElement.textContent).toContain('Username is required');
+                // Store validation element
+                const validationElement: HTMLDivElement = signUp.querySelector(validationSelector) as HTMLDivElement;
+
+                // Expect correct validation message to be shown
+                expect(validationElement.textContent).toContain(error);
+            });
         });
-
-        it('Displays length error when username is less than 4 characters', (): void => {
-            // Store component
-            const signUp = fixture.nativeElement as HTMLElement;
-
-            // Expect validation messages not to be shown
-            expect(signUp.querySelector(selectors.usernameValidation)).toBeNull();
-
-            // Store username input
-            const usernameInput = signUp.querySelector(selectors.username) as HTMLInputElement;
-
-            // Enter an invalid value for username
-            usernameInput.value = '123';
-            usernameInput.dispatchEvent(new Event('input'));
-            usernameInput.dispatchEvent(new Event('blur'));
-            fixture.detectChanges();
-
-            // Store validation element
-            const validationElement: HTMLDivElement = signUp.querySelector(selectors.usernameValidation) as HTMLDivElement;
-
-            // Expect correct validation message to show
-            expect(validationElement.textContent).toContain('Username must be at least 4 characters long');
-        });
-    })
+    });
 });
