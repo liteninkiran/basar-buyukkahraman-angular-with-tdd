@@ -252,6 +252,13 @@ describe('SignUpComponent', (): void => {
             { label: 'Password', inputValue: 'passWORD'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
             { label: 'Password', inputValue: 'pass1234'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
             { label: 'Password', inputValue: 'PASS1234'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
+
+            // Confirm Password
+            {
+                label: 'Confirm Password',
+                inputValue: 'pass',
+                message: 'Passwords do not match',
+            },
         ];
 
         it.each(table)(name, async ({ label, inputValue, message }) => {
