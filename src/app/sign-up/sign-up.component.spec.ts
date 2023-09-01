@@ -278,4 +278,55 @@ describe('SignUpComponent', () => {
 
     });
 
+    describe('Validation', (): void => {
+        const selectors = {
+            usernameValidation: 'div[data-testid="username-validation"]',
+            username: 'input[id="username"]',
+        }
+
+        it('Displays Username is required message when username is null', (): void => {
+            // Store component
+            const signUp = fixture.nativeElement as HTMLElement;
+
+            // Expect validation messages not to be shown
+            expect(signUp.querySelector(selectors.usernameValidation)).toBeNull();
+
+            // Store username input
+            const usernameInput = signUp.querySelector(selectors.username) as HTMLInputElement;
+
+            // Enter & exit the input element
+            usernameInput.dispatchEvent(new Event('focus'));
+            usernameInput.dispatchEvent(new Event('blur'));
+            fixture.detectChanges();
+
+            // Store validation element
+            const validationElement: HTMLDivElement = signUp.querySelector(selectors.usernameValidation) as HTMLDivElement;
+
+            // Expect correct validation message to show
+            expect(validationElement.textContent).toContain('Username is required');
+        });
+
+        it('Displays length error when username is less than 4 characters', (): void => {
+            // Store component
+            const signUp = fixture.nativeElement as HTMLElement;
+
+            // Expect validation messages not to be shown
+            expect(signUp.querySelector(selectors.usernameValidation)).toBeNull();
+
+            // Store username input
+            const usernameInput = signUp.querySelector(selectors.username) as HTMLInputElement;
+
+            // Enter a value for username
+            usernameInput.value = "123";
+            usernameInput.dispatchEvent(new Event('input'));
+            usernameInput.dispatchEvent(new Event('blur'));
+            fixture.detectChanges();
+
+            // Store validation element
+            const validationElement: HTMLDivElement = signUp.querySelector(selectors.usernameValidation) as HTMLDivElement;
+
+            // Expect correct validation message to show
+            expect(validationElement.textContent).toContain('Username must be at least 4 characters long');
+        });
+    })
 });
