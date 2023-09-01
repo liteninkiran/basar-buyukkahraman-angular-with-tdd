@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../core/user.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { passwordMatchValidator } from './password-match.validator';
 
 @Component({
     selector: 'app-sign-up',
@@ -17,13 +18,15 @@ export class SignUpComponent implements OnInit {
         email: new FormControl('', [Validators.required, Validators.email]),
         password: new FormControl('', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)]),
         confirmPassword: new FormControl(''),
+    }, {
+        validators: passwordMatchValidator,
     });
 
     get usernameError(): string | undefined {
         const field: AbstractControl = this.form.get('username') as AbstractControl;
-        const hasErrors = field.errors && (field.touched || field.dirty);
+        const hasErrors: boolean = (field.errors && (field.touched || field.dirty)) as boolean;
         return hasErrors
-            ? field.errors['required']
+            ? field.errors && field.errors['required']
                 ? 'Username is required'
                 : 'Username must be at least 4 characters long'
             : undefined;
@@ -31,9 +34,9 @@ export class SignUpComponent implements OnInit {
 
     get emailError(): string | undefined {
         const field: AbstractControl = this.form.get('email') as AbstractControl;
-        const hasErrors = field.errors && (field.touched || field.dirty);
+        const hasErrors: boolean = (field.errors && (field.touched || field.dirty)) as boolean;
         return hasErrors
-            ? field.errors['required']
+            ? field.errors && field.errors['required']
                 ? 'Email is required'
                 : 'Invalid email address'
             : undefined;
@@ -41,11 +44,21 @@ export class SignUpComponent implements OnInit {
 
     get passwordError(): string | undefined {
         const field: AbstractControl = this.form.get('password') as AbstractControl;
-        const hasErrors = field.errors && (field.touched || field.dirty);
+        const hasErrors: boolean = (field.errors && (field.touched || field.dirty)) as boolean;
         return hasErrors
-            ? field.errors['required']
+            ? field.errors && field.errors['required']
                 ? 'Password is required'
                 : 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'
+            : undefined;
+    }
+
+    get confirmPasswordError(): string | undefined {
+        const form: FormGroup = this.form;
+        const hasErrors: boolean = (form.errors && (form.touched || form.dirty)) as boolean;
+        return hasErrors
+            ? form.errors && form.errors['passwordMatch']
+                ? 'Passwords do not match'
+                : undefined
             : undefined;
     }
 

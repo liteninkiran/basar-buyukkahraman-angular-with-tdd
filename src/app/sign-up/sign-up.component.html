@@ -61,14 +61,21 @@
 
             <!-- Confirm Password -->
             <div class="mb-3">
-                <label for="passwordConfirm" class="form-label">Confirm Password</label>
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
                 <input
-                    id="passwordConfirm"
+                    id="confirmPassword"
                     class="form-control"
                     type="password"
                     formControlName="confirmPassword"
+                    [class.is-invalid]="confirmPasswordError"
                     (input)="onChange()"
                 >
+
+                <!-- Validation -->
+                <div data-testid="confirmPassword-validation" *ngIf="confirmPasswordError" class="invalid-feedback">
+                    {{ confirmPasswordError }}
+                </div>
+                
             </div>
 
             <!-- Sign Up Button -->

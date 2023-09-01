@@ -69,12 +69,12 @@ describe('SignUpComponent', () => {
         })
 
         it('has confirm password input', (): void => {
-            elementCheck({ id: 'passwordConfirm', text: 'Confirm Password' });
+            elementCheck({ id: 'confirmPassword', text: 'Confirm Password' });
         });
 
         it('has password type for confirm password input', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
-            const input: HTMLInputElement = getInputElement(signUp, 'passwordConfirm');
+            const input: HTMLInputElement = getInputElement(signUp, 'confirmPassword');
             expect(input.type).toBe('password');
         })
 
@@ -118,7 +118,7 @@ describe('SignUpComponent', () => {
             username: 'input[id="username"]',
             email: 'input[id="email"]',
             password: 'input[id="password"]',
-            confirmPassword: 'input[id="passwordConfirm"]',
+            confirmPassword: 'input[id="confirmPassword"]',
             spinner: 'span[role="status"]',
             alert: '.alert-success',
             form: 'div[data-testid="form-sign-up"]',
@@ -301,6 +301,13 @@ describe('SignUpComponent', () => {
             { field: 'password', value: 'passWORD', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
             { field: 'password', value: 'pass1234', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
             { field: 'password', value: 'PASS1234', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
+
+            // Confirm Password
+            {
+                field: 'confirmPassword',
+                value: 'pass',
+                error: 'Passwords do not match',
+            },
         ];
 
         testCases.forEach(({ field, value, error }): void => {
