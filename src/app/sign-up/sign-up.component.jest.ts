@@ -7,6 +7,10 @@ import { SharedModule } from '../shared/shared.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import userEvent from '@testing-library/user-event';
 
+type UniqueEmailCheck = {
+    email: string;
+}
+
 interface IRequestBody {
     username: string;
     password: string;
@@ -25,8 +29,9 @@ const setup = async (): Promise<void> => {
         ],
     });
 }
-const url: Path = '/api/1.0/users';
-const resolver: ResponseResolver<
+const signUpUrl: Path = '/api/1.0/users';
+const emailUrl: Path = '/api/1.0/user/email';
+const signUpResolver: ResponseResolver<
     RestRequest<DefaultRequestBody, PathParams>,
     RestContext,
     DefaultRequestBody
@@ -39,8 +44,24 @@ const resolver: ResponseResolver<
         counter += 1;
         return res(ctx.status(200), ctx.json({}));
     }
-const postRequest: RestHandler = rest.post(url, resolver);
-const server: SetupServerApi = setupServer(postRequest);
+const emailResolver: ResponseResolver<
+    RestRequest<DefaultRequestBody, PathParams>,
+    RestContext,
+    DefaultRequestBody
+> = (
+    req: RestRequest<DefaultRequestBody, PathParams>,
+    res: ResponseComposition<DefaultRequestBody>,
+    ctx: RestContext
+): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
+        const body = req.body as UniqueEmailCheck
+        if (body.email === 'non-unique-email@mail.com') {
+            return res(ctx.status(200), ctx.json({}))
+        }
+        return res(ctx.status(404), ctx.json({}));
+    }
+const signupRequest: RestHandler = rest.post(signUpUrl, signUpResolver);
+const emailRequest: RestHandler = rest.post(emailUrl, emailResolver);
+const server: SetupServerApi = setupServer(signupRequest, emailRequest);
 
 beforeEach((): void => { counter = 0; });
 beforeAll((): void => server.listen());
@@ -239,12 +260,13 @@ describe('SignUpComponent', (): void => {
         const name = `Displays the '$message' error when $label is '$inputValue'`;
         const table = [
             // Username
-            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required'                                                      },
-            { label: 'Username', inputValue: '123'               , message: 'Username must be at least 4 characters long'                               },
+            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required'                          },
+            { label: 'Username', inputValue: '123'               , message: 'Username must be at least 4 characters long'   },
 
             // Email
-            { label: 'Email'   , inputValue: '{space}{backspace}', message: 'Email is required'                                                         },
-            { label: 'Email'   , inputValue: 'invalid'           , message: 'Invalid email address'                                                     },
+            { label: 'Email', inputValue: '{space}{backspace}'       , message: 'Email is required'     },
+            { label: 'Email', inputValue: 'invalid'                  , message: 'Invalid email address' },
+            { label: 'Email', inputValue: 'non-unique-email@mail.com', message: 'Email in use'          },
 
             // Password
             { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required'                                                      },
@@ -274,7 +296,8 @@ describe('SignUpComponent', (): void => {
             await userEvent.tab();
 
             // Expect correct validation message to be shown
-            expect(screen.queryByText(message)).toBeInTheDocument();
+            const errorMessage = await screen.findByText(message);
+            expect(errorMessage).toBeInTheDocument();
         });
 
     });
