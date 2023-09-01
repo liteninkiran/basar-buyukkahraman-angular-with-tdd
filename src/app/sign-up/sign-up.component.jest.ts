@@ -238,8 +238,10 @@ describe('SignUpComponent', (): void => {
 
         const name = `Displays the '$message' error when $label is '$inputValue'`;
         const table = [
-            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required' },
             { label: 'Username', inputValue: '123', message: 'Username must be at least 4 characters long' },
+            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required' },
+            { label: 'Email'   , inputValue: '{space}{backspace}', message: 'Email is required'    },
+            { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required' },
         ];
 
         it.each(table)(name, async ({ label, inputValue, message }) => {

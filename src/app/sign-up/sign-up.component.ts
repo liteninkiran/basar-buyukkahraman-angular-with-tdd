@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../core/user.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-sign-up',
@@ -14,18 +14,34 @@ export class SignUpComponent implements OnInit {
     public signUpSuccess = false;
     public form = new FormGroup({
         username: new FormControl('', [Validators.required, Validators.minLength(4)]),
-        email: new FormControl(''),
-        password: new FormControl(''),
+        email: new FormControl('', [Validators.required]),
+        password: new FormControl('', [Validators.required]),
         confirmPassword: new FormControl(''),
     });
 
     get usernameError(): string | undefined {
-        const field = this.form.get('username');
-        const hasErrors = field?.errors && (field?.touched || field?.dirty);
+        const field: AbstractControl = this.form.get('username') as AbstractControl;
+        const hasErrors = field.errors && (field.touched || field.dirty);
         return hasErrors
             ? field.errors['required']
                 ? 'Username is required'
                 : 'Username must be at least 4 characters long'
+            : undefined;
+    }
+
+    get emailError(): string | undefined {
+        const field: AbstractControl = this.form.get('email') as AbstractControl;
+        const hasErrors = field.errors && (field.touched || field.dirty);
+        return hasErrors && field.errors['required']
+            ? 'Email is required'
+            : undefined;
+    }
+
+    get passwordError(): string | undefined {
+        const field: AbstractControl = this.form.get('password') as AbstractControl;
+        const hasErrors = field.errors && (field.touched || field.dirty);
+        return hasErrors && field.errors['required']
+            ? 'Password is required'
             : undefined;
     }
 

@@ -287,8 +287,10 @@ describe('SignUpComponent', () => {
     describe('Validation', (): void => {
 
         const testCases: ITestCase[] = [
-            { field: 'username', value: '', error: 'Username is required' },
             { field: 'username', value: '123', error: 'Username must be at least 4 characters long' },
+            { field: 'username', value: ''   , error: 'Username is required' },
+            { field: 'email'   , value: ''   , error: 'Email is required' },
+            { field: 'password', value: ''   , error: 'Password is required' },
         ];
 
         testCases.forEach(({ field, value, error }): void => {
