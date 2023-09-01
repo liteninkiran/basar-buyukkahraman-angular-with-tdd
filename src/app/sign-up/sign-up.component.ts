@@ -14,8 +14,8 @@ export class SignUpComponent implements OnInit {
     public signUpSuccess = false;
     public form = new FormGroup({
         username: new FormControl('', [Validators.required, Validators.minLength(4)]),
-        email: new FormControl('', [Validators.required]),
-        password: new FormControl('', [Validators.required]),
+        email: new FormControl('', [Validators.required, Validators.email]),
+        password: new FormControl('', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)]),
         confirmPassword: new FormControl(''),
     });
 
@@ -32,16 +32,20 @@ export class SignUpComponent implements OnInit {
     get emailError(): string | undefined {
         const field: AbstractControl = this.form.get('email') as AbstractControl;
         const hasErrors = field.errors && (field.touched || field.dirty);
-        return hasErrors && field.errors['required']
-            ? 'Email is required'
+        return hasErrors
+            ? field.errors['required']
+                ? 'Email is required'
+                : 'Invalid email address'
             : undefined;
     }
 
     get passwordError(): string | undefined {
         const field: AbstractControl = this.form.get('password') as AbstractControl;
         const hasErrors = field.errors && (field.touched || field.dirty);
-        return hasErrors && field.errors['required']
-            ? 'Password is required'
+        return hasErrors
+            ? field.errors['required']
+                ? 'Password is required'
+                : 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'
             : undefined;
     }
 

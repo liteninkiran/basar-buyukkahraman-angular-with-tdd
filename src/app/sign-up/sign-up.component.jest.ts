@@ -238,10 +238,20 @@ describe('SignUpComponent', (): void => {
 
         const name = `Displays the '$message' error when $label is '$inputValue'`;
         const table = [
-            { label: 'Username', inputValue: '123', message: 'Username must be at least 4 characters long' },
-            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required' },
-            { label: 'Email'   , inputValue: '{space}{backspace}', message: 'Email is required'    },
-            { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required' },
+            // Username
+            { label: 'Username', inputValue: '{space}{backspace}', message: 'Username is required'                                                      },
+            { label: 'Username', inputValue: '123'               , message: 'Username must be at least 4 characters long'                               },
+
+            // Email
+            { label: 'Email'   , inputValue: '{space}{backspace}', message: 'Email is required'                                                         },
+            { label: 'Email'   , inputValue: 'invalid'           , message: 'Invalid email address'                                                     },
+
+            // Password
+            { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required'                                                      },
+            { label: 'Password', inputValue: 'password'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
+            { label: 'Password', inputValue: 'passWORD'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
+            { label: 'Password', inputValue: 'pass1234'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
+            { label: 'Password', inputValue: 'PASS1234'          , message: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number'  },
         ];
 
         it.each(table)(name, async ({ label, inputValue, message }) => {

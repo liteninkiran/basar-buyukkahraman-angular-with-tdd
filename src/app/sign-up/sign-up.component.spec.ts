@@ -287,10 +287,20 @@ describe('SignUpComponent', () => {
     describe('Validation', (): void => {
 
         const testCases: ITestCase[] = [
-            { field: 'username', value: '123', error: 'Username must be at least 4 characters long' },
-            { field: 'username', value: ''   , error: 'Username is required' },
-            { field: 'email'   , value: ''   , error: 'Email is required' },
-            { field: 'password', value: ''   , error: 'Password is required' },
+            // Username
+            { field: 'username', value: ''        , error: 'Username is required'                                                     },
+            { field: 'username', value: '123'     , error: 'Username must be at least 4 characters long'                              },
+
+            // Email
+            { field: 'email'   , value: ''        , error: 'Email is required'                                                        },
+            { field: 'email'   , value: 'invalid' , error: 'Invalid email address'                                                    },
+
+            // Password
+            { field: 'password', value: ''        , error: 'Password is required'                                                     },
+            { field: 'password', value: 'password', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
+            { field: 'password', value: 'passWORD', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
+            { field: 'password', value: 'pass1234', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
+            { field: 'password', value: 'PASS1234', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
         ];
 
         testCases.forEach(({ field, value, error }): void => {
