@@ -284,6 +284,29 @@ describe('SignUpComponent', () => {
             expect(signUp.querySelector(selectors.form)).toBeFalsy();
         });
 
+        it('Displays validation error coming from backend after submit failure', async (): Promise<void> => {
+            // Setup the form with user inputs
+            await setupForm();
+
+            // Sign up
+            button.click();
+
+            // Store request
+            const req = httpTestingController.expectOne(url);
+
+            // Generate back-end response
+            const body = { validationErrors: { email: 'Email in use' } }
+            const options = { status: 400, statusText: 'Bad Request' }
+
+            // Resolve request
+            req.flush(body, options);
+            fixture.detectChanges();
+
+            // Expect validation error to be shown
+            const validationElement = signUp.querySelector(`div[data-testid="email-validation"]`);
+            expect(validationElement?.textContent).toContain('Email in use');
+        });
+
     });
 
     describe('Validation', (): void => {
@@ -339,7 +362,7 @@ describe('SignUpComponent', () => {
             });
         });
 
-        it(`Displays the 'Email in use' error when email is not unique`, () => {
+        it(`Displays the 'Email in use' error when email is not unique`, (): void => {
             let httpTestingController = TestBed.inject(HttpTestingController);
             const signUp = fixture.nativeElement as HTMLElement;
             expect(signUp.querySelector(`div[data-testid="email-validation"]`)).toBeNull();

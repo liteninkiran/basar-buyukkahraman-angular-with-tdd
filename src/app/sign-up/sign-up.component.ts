@@ -3,6 +3,7 @@ import { UserService } from '../core/user.service';
 import { AbstractControl, AbstractControlOptions, FormControl, FormGroup, Validators } from '@angular/forms';
 import { passwordMatchValidator } from './password-match.validator';
 import { UniqueEmailValidator } from './unique-email.validator';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface IValidatorOptions {
     username: AbstractControlOptions;
@@ -74,6 +75,8 @@ export class SignUpComponent implements OnInit {
                 return 'Invalid email address';
             } else if (field.errors['uniqueEmail']) {
                 return 'Email in use';
+            } else if (field.errors['backend']) {
+                return field.errors['backend'];
             }
         }
         return;
@@ -124,9 +127,15 @@ export class SignUpComponent implements OnInit {
     private signUp(): void {
         const body: any = this.form.value;
         delete body.confirmPassword;
-        this.userService.signUp(body).subscribe((res) => {
-            this.toggleApi();
-            this.signUpSuccess = true;
+        this.userService.signUp(body).subscribe({
+            next: (): void => {
+                this.toggleApi();
+                this.signUpSuccess = true;
+            },
+            error: (httpError: HttpErrorResponse): void => {
+                const emailValidationErrorMessage = httpError.error.validationErrors.email
+                this.form.get('email')?.setErrors({ backend: emailValidationErrorMessage });
+            }
         });
     }
 
