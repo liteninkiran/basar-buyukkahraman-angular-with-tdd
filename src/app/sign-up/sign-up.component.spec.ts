@@ -307,7 +307,7 @@ describe('SignUpComponent', () => {
             expect(validationElement?.textContent).toContain('Email in use');
         });
 
-        it('Hides spinner after sign up request fails', async () => {
+        it('Hides spinner after sign up request fails', async (): Promise<void> => {
             await setupForm();
             button.click();
             const req = httpTestingController.expectOne(url);

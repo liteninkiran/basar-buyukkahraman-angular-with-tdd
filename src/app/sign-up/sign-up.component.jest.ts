@@ -247,7 +247,7 @@ describe('SignUpComponent', (): void => {
             expect(form).not.toBeInTheDocument();
         });
 
-        it('Displays validation error coming from backend after submit failure', async () => {
+        it('Displays validation error coming from backend after submit failure', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm({email: nonUniqueEmail});
 
@@ -257,6 +257,20 @@ describe('SignUpComponent', (): void => {
             // Expect the email error message to be shown
             const errorMessage = await screen.findByText('Email in use');
             expect(errorMessage).toBeInTheDocument();
+        });
+
+        it('Hides spinner after sign up request fails', async (): Promise<void> => {
+            // Setup the form with user inputs
+            await setupForm({email: nonUniqueEmail});
+
+            // Sign up
+            await userEvent.click(button);
+
+            // Wait for response
+            await screen.findByText('Email in use');
+
+            // Expect spinner to be hidden
+            expect(screen.queryByRole('status')).not.toBeInTheDocument();
         });
     });
 
