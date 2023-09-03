@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/angular';
 import { SignUpComponent } from './sign-up.component';
 import { HttpClientModule } from '@angular/common/http';
 import { SetupServerApi, setupServer } from 'msw/node';
-import { DefaultRequestBody, MockedResponse, Path, PathParams, ResponseComposition, ResponseResolver, RestContext, RestHandler, RestRequest, rest } from 'msw';
+import { Path, RestHandler, rest } from 'msw';
 import { SharedModule } from '../shared/shared.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import userEvent from '@testing-library/user-event';
@@ -20,7 +20,12 @@ interface IRequestBody {
 let requestBody: IRequestBody = {} as IRequestBody;
 let counter = 0;
 
-const setup = async (): Promise<void> => {
+const nonUniqueEmail = 'not-unique@mail.com';
+const signUpUrl: Path = '/api/1.0/users';
+const emailUrl: Path = '/api/1.0/user/email';
+
+// Setup
+const setup = (async (): Promise<void> => {
     await render(SignUpComponent, {
         imports: [
             HttpClientModule,
@@ -28,42 +33,31 @@ const setup = async (): Promise<void> => {
             ReactiveFormsModule,
         ],
     });
-}
-const signUpUrl: Path = '/api/1.0/users';
-const emailUrl: Path = '/api/1.0/user/email';
-const signUpResolver: ResponseResolver<
-    RestRequest<DefaultRequestBody, PathParams>,
-    RestContext,
-    DefaultRequestBody
-> = (
-    req: RestRequest<DefaultRequestBody, PathParams>,
-    res: ResponseComposition<DefaultRequestBody>,
-    ctx: RestContext
-): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
-        requestBody = req.body as IRequestBody;
-        counter += 1;
-        return res(ctx.status(200), ctx.json({}));
-    }
-const emailResolver: ResponseResolver<
-    RestRequest<DefaultRequestBody, PathParams>,
-    RestContext,
-    DefaultRequestBody
-> = (
-    req: RestRequest<DefaultRequestBody, PathParams>,
-    res: ResponseComposition<DefaultRequestBody>,
-    ctx: RestContext
-): MockedResponse<DefaultRequestBody> | Promise<MockedResponse<DefaultRequestBody>> => {
-        const body = req.body as UniqueEmailCheck
-        if (body.email === 'non-unique-email@mail.com') {
-            return res(ctx.status(200), ctx.json({}))
-        }
-        return res(ctx.status(404), ctx.json({}));
-    }
+});
+
+// Sign Up Resolver
+const signUpResolver = ((req: any, res: any, ctx: any) => {
+    requestBody = req.body as IRequestBody;
+    counter += 1;
+    return requestBody.email === nonUniqueEmail
+        ? res(ctx.status(400), ctx.json({}))
+        : res(ctx.status(200), ctx.json({}));
+});
+
+// Email Resolver
+const emailResolver = ((req: any, res: any, ctx: any) => {
+    const body = req.body as UniqueEmailCheck
+    return body.email === nonUniqueEmail
+        ? res(ctx.status(200), ctx.json({}))
+        : res(ctx.status(404), ctx.json({}));
+});
+
+// Server
 const signupRequest: RestHandler = rest.post(signUpUrl, signUpResolver);
 const emailRequest: RestHandler = rest.post(emailUrl, emailResolver);
 const server: SetupServerApi = setupServer(signupRequest, emailRequest);
 
-beforeEach((): void => { counter = 0; });
+beforeEach((): void => { server.resetHandlers(); counter = 0; });
 beforeAll((): void => server.listen());
 afterAll((): void => server.close());
 
@@ -71,51 +65,51 @@ describe('SignUpComponent', (): void => {
 
     describe('Layout', (): void => {
 
-        it('has Sign Up header', async (): Promise<void> => {
+        it('Has Sign Up header', async (): Promise<void> => {
             await setup();
             const header = screen.getByRole('heading', { name: 'Sign Up' });
             expect(header).toBeInTheDocument();
         });
 
-        it('has username input', async (): Promise<void> => {
+        it('Has username input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Username')).toBeInTheDocument();
         });
 
-        it('has email input', async (): Promise<void> => {
+        it('Has email input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Email')).toBeInTheDocument();
         });
 
-        it('has password input', async (): Promise<void> => {
+        it('Has password input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Password')).toBeInTheDocument();
         });
 
-        it('has password type for password input', async (): Promise<void> => {
+        it('Has password type for password input', async (): Promise<void> => {
             await setup();
             const input = screen.getByLabelText('Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
-        it('has confirm password input', async (): Promise<void> => {
+        it('Has confirm password input', async (): Promise<void> => {
             await setup();
             expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
         });
 
-        it('has password type for password repeat input', async (): Promise<void> => {
+        it('Has password type for password repeat input', async (): Promise<void> => {
             await setup();
             const input = screen.getByLabelText('Confirm Password');
             expect(input).toHaveAttribute('type', 'password');
         });
 
-        it('has Sign Up button', async (): Promise<void> => {
+        it('Has Sign Up button', async (): Promise<void> => {
             await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeInTheDocument();
         });
 
-        it('button is initially disabled', async (): Promise<void> => {
+        it('Button is initially disabled', async (): Promise<void> => {
             await setup();
             const button = screen.getByRole('button', { name: 'Sign Up' });
             expect(button).toBeDisabled();
@@ -136,7 +130,7 @@ describe('SignUpComponent', (): void => {
         let confirmPasswordInput: HTMLInputElement;
         let button: HTMLButtonElement;
 
-        const setupForm = async () => {
+        const setupForm = async (values?: {email: string}): Promise<void> => {
             // Global setup
             await setup();
 
@@ -151,7 +145,7 @@ describe('SignUpComponent', (): void => {
 
             // Enter sign-up details
             await userEvent.type(usernameInput, username);
-            await userEvent.type(emailInput, email);
+            await userEvent.type(emailInput, values?.email || email);
             await userEvent.type(passwordInput, password);
             await userEvent.type(confirmPasswordInput, password);
         }
@@ -253,6 +247,17 @@ describe('SignUpComponent', (): void => {
             expect(form).not.toBeInTheDocument();
         });
 
+        it('Displays validation error coming from backend after submit failure', async () => {
+            // Setup the form with user inputs
+            await setupForm({email: nonUniqueEmail});
+
+            // Sign up
+            await userEvent.click(button);
+
+            // Expect the email error message to be shown
+            const errorMessage = await screen.findByText('Email in use');
+            expect(errorMessage).toBeInTheDocument();
+        });
     });
 
     describe('Validation', (): void => {
@@ -264,9 +269,9 @@ describe('SignUpComponent', (): void => {
             { label: 'Username', inputValue: '123'               , message: 'Username must be at least 4 characters long'   },
 
             // Email
-            { label: 'Email', inputValue: '{space}{backspace}'       , message: 'Email is required'     },
-            { label: 'Email', inputValue: 'invalid'                  , message: 'Invalid email address' },
-            { label: 'Email', inputValue: 'non-unique-email@mail.com', message: 'Email in use'          },
+            { label: 'Email', inputValue: '{space}{backspace}', message: 'Email is required'     },
+            { label: 'Email', inputValue: 'invalid'           , message: 'Invalid email address' },
+            { label: 'Email', inputValue: nonUniqueEmail      , message: 'Email in use'          },
 
             // Password
             { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required'                                                      },
