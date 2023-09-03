@@ -19,7 +19,6 @@ interface IValidatorOptions {
 })
 export class SignUpComponent implements OnInit {
 
-    public disabled = true;
     public apiProgress: boolean = false;
     public signUpSuccess = false;
     public options: IValidatorOptions = {
@@ -110,18 +109,27 @@ export class SignUpComponent implements OnInit {
     public ngOnInit(): void {
     }
 
-    public onClickSignUp() {
+    public onClickSignUp(): void {
         this.toggleApi();
         this.signUp();
     }
 
-    public onChange() {
-        this.setDisabled();
+    public isDisabled(): boolean {
+        const formFilled: boolean = this.form.get('username')?.value
+            && this.form.get('email')?.value
+            && this.form.get('password')?.value
+            && this.form.get('confirmPassword')?.value
+
+        const validationError: boolean = this.usernameError
+            || this.emailError
+            || this.passwordError
+            || this.confirmPasswordError;
+
+        return (!formFilled || validationError || this.apiProgress);
     }
 
     private toggleApi(): void {
         this.apiProgress = !this.apiProgress;
-        this.setDisabled();
     }
 
     private signUp(): void {
@@ -137,21 +145,5 @@ export class SignUpComponent implements OnInit {
                 this.form.get('email')?.setErrors({ backend: emailValidationErrorMessage });
             }
         });
-    }
-
-    private setDisabled(): void {
-        const password = this.form.get('password')?.value;
-        const confirmPassword = this.form.get('confirmPassword')?.value;
-        const inputConfig = {
-            checks: [
-                password === confirmPassword,
-                password.length + confirmPassword.length > 0,
-                !this.apiProgress,
-            ],
-            enabled: false,
-        };
-        const passingChecks = inputConfig.checks.filter(Boolean);
-        inputConfig.enabled = passingChecks.length === inputConfig.checks.length;
-        this.disabled = !inputConfig.enabled;
     }
 }

@@ -181,7 +181,7 @@ describe('SignUpComponent', () => {
             fixture.detectChanges();
         }
 
-        it('Enables the button when the password and confirm password fields have same value', async (): Promise<void> => {
+        it('Enables the button when all the fields have valid input', async (): Promise<void> => {
             // Setup the form with user inputs
             await setupForm();
 
