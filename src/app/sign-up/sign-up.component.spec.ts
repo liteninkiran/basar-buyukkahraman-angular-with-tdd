@@ -307,21 +307,35 @@ describe('SignUpComponent', () => {
             expect(validationElement?.textContent).toContain('Email in use');
         });
 
+        it('Hides spinner after sign up request fails', async () => {
+            await setupForm();
+            button.click();
+            const req = httpTestingController.expectOne(url);
+            req.flush({
+                validationErrors: { email: 'Email in use' }
+            }, {
+                status: 400,
+                statusText: 'Bad Request'
+            });
+            fixture.detectChanges();
+            expect(signUp.querySelector('span[role="status"]')).toBeFalsy();
+        });
+
     });
 
     describe('Validation', (): void => {
 
         const testCases: ITestCase[] = [
             // Username
-            { field: 'username', value: ''        , error: 'Username is required'                                                     },
-            { field: 'username', value: '123'     , error: 'Username must be at least 4 characters long'                              },
+            { field: 'username', value: '', error: 'Username is required' },
+            { field: 'username', value: '123', error: 'Username must be at least 4 characters long' },
 
             // Email
-            { field: 'email'   , value: ''        , error: 'Email is required'                                                        },
-            { field: 'email'   , value: 'invalid' , error: 'Invalid email address'                                                    },
+            { field: 'email', value: '', error: 'Email is required' },
+            { field: 'email', value: 'invalid', error: 'Invalid email address' },
 
             // Password
-            { field: 'password', value: ''        , error: 'Password is required'                                                     },
+            { field: 'password', value: '', error: 'Password is required' },
             { field: 'password', value: 'password', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
             { field: 'password', value: 'passWORD', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
             { field: 'password', value: 'pass1234', error: 'Password must have at least 1 uppercase, 1 lowercase letter and 1 number' },
