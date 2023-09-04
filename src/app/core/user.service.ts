@@ -22,4 +22,8 @@ export class UserService {
     public isEmailTaken(value: string): Observable<any> {
         return this.httpClient.post('/api/1.0/user/email', { email: value });
     }
+
+    public activate(token: string): Observable<any> {
+        return this.httpClient.post('/api/1.0/users/token/' + token, {});
+    }
 }
