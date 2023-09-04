@@ -7,12 +7,16 @@ import { SharedModule } from './shared/shared.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { AppRouterModule } from './router/app-router.module';
+import { LoginComponent } from './login/login.component';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         SignUpComponent,
         HomeComponent,
+        LoginComponent,
+        UserComponent,
     ],
     imports: [
         BrowserModule,

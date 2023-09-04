@@ -21,6 +21,9 @@ describe('Routing', (): void => {
     const table = [
         { path: '/', pageId: 'home-page' },
         { path: '/signup', pageId: 'sign-up-page' },
+        { path: '/login', pageId: 'login-page' },
+        { path: '/user/1', pageId: 'user-page' },
+        { path: '/user/2', pageId: 'user-page' },
     ];
 
     it.each(table)(name, async ({ path, pageId }): Promise<void> => {
