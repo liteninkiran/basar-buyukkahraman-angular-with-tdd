@@ -44,47 +44,47 @@ describe('SignUpComponent', () => {
     });
 
     describe('Layout', (): void => {
-        it('has Sign Up header', (): void => {
+        it('Has Sign Up header', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
             const h1: HTMLElement = signUp.querySelector('h1') as HTMLElement;
             expect(h1.textContent).toBe('Sign Up');
         });
 
-        it('has username input', (): void => {
+        it('Has username input', (): void => {
             elementCheck({ id: 'username', text: 'Username' });
         });
 
-        it('has email input', (): void => {
+        it('Has email input', (): void => {
             elementCheck({ id: 'email', text: 'Email' });
         });
 
-        it('has password input', (): void => {
+        it('Has password input', (): void => {
             elementCheck({ id: 'password', text: 'Password' });
         });
 
-        it('has password type for password input', (): void => {
+        it('Has password type for password input', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
             const input: HTMLInputElement = getInputElement(signUp, 'password');
             expect(input.type).toBe('password');
         })
 
-        it('has confirm password input', (): void => {
+        it('Has confirm password input', (): void => {
             elementCheck({ id: 'confirmPassword', text: 'Confirm Password' });
         });
 
-        it('has password type for confirm password input', (): void => {
+        it('Has password type for confirm password input', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
             const input: HTMLInputElement = getInputElement(signUp, 'confirmPassword');
             expect(input.type).toBe('password');
         })
 
-        it('has Sign Up button', (): void => {
+        it('Has Sign Up button', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
             const button: HTMLButtonElement = signUp.querySelector('button') as HTMLButtonElement;
             expect(button.textContent).toContain('Sign Up');
         })
 
-        it('button is initially disabled', (): void => {
+        it('Button is initially disabled', (): void => {
             const signUp: HTMLElement = fixture.nativeElement as HTMLElement;
             const button: HTMLButtonElement = signUp.querySelector('button') as HTMLButtonElement;
             expect(button.disabled).toBeTruthy();
