@@ -8,7 +8,9 @@ import { AppComponent } from './app.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { ActivateComponent } from './activate/activate.component';
 import { routes } from './router/app-router.module';
+import { UserComponent } from './user/user.component';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -22,7 +24,9 @@ describe('AppComponent', () => {
                 AppComponent,
                 SignUpComponent,
                 HomeComponent,
+                UserComponent,
                 LoginComponent,
+                ActivateComponent,
             ],
             imports: [
                 RouterTestingModule.withRoutes(routes),
@@ -41,16 +45,32 @@ describe('AppComponent', () => {
     });
 
     describe('Routing', (): void => {
-        const testCases = [
-            { path: '/', pageId: 'home-page' },
-            { path: '/signup', pageId: 'sign-up-page' },
-            { path: '/login', pageId: 'login-page' },
-            { path: '/user/1', pageId: 'user-page' },
-            { path: '/user/2', pageId: 'user-page' },
-        ];
 
-        testCases.forEach(({ path, pageId }): void => {
-            it(`Displays ${pageId} when path is ${path}`, async (): Promise<void> => {
+        const tests = {
+            routing: [
+                { path: '/', pageId: 'home-page' },
+                { path: '/signup', pageId: 'sign-up-page' },
+                { path: '/login', pageId: 'login-page' },
+                { path: '/user/1', pageId: 'user-page' },
+                { path: '/user/2', pageId: 'user-page' },
+                { path: '/activate/123', pageId: 'activation-page' },
+                { path: '/activate/456', pageId: 'activation-page' },
+            ],
+            link: [
+                { path: '/', title: 'Home' },
+                { path: '/signup', title: 'Sign Up' },
+                { path: '/login', title: 'Login' },
+            ],
+            navigation: [
+                { initialPath: '/', clickingTo: 'Sign Up', visiblePage: 'sign-up-page' },
+                { initialPath: '/signup', clickingTo: 'Home', visiblePage: 'home-page' },
+                { initialPath: '/', clickingTo: 'Login', visiblePage: 'login-page' },
+            ],
+        }
+
+        // Displays '${pageId}' when path is '${path}'
+        tests.routing.forEach(({ path, pageId }): void => {
+            it(`Displays '${pageId}' when path is '${path}'`, async (): Promise<void> => {
                 await router.navigate([path]);
                 fixture.detectChanges();
                 const page = appComponent.querySelector(`[data-testid="${pageId}"]`);
@@ -58,38 +78,16 @@ describe('AppComponent', () => {
             });
         });
 
-        const linkTests = [
-            { path: '/', title: 'Home' },
-            { path: '/signup', title: 'Sign Up' },
-            { path: '/login', title: 'Login' },
-        ];
-
-        linkTests.forEach(({ path, title }) => {
+        // Has link with title '${title}' to '${path}'
+        tests.link.forEach(({ path, title }): void => {
             it(`Has link with title '${title}' to '${path}'`, async (): Promise<void> => {
                 const linkElement: HTMLAnchorElement = appComponent.querySelector(`a[title="${title}"]`) as HTMLAnchorElement;
                 expect(linkElement.pathname).toEqual(path);
             });
         });
 
-        const navigationTests = [
-            {
-                initialPath: '/',
-                clickingTo: 'Sign Up',
-                visiblePage: 'sign-up-page',
-            },
-            {
-                initialPath: '/signup',
-                clickingTo: 'Home',
-                visiblePage: 'home-page',
-            },
-            {
-                initialPath: '/',
-                clickingTo: 'Login',
-                visiblePage: 'login-page',
-            },
-        ];
-
-        navigationTests.forEach(({ initialPath, clickingTo, visiblePage }) => {
+        // Displays '${visiblePage}' after clicking '${clickingTo}' link
+        tests.navigation.forEach(({ initialPath, clickingTo, visiblePage }): void => {
             it(`Displays '${visiblePage}' after clicking '${clickingTo}' link`, fakeAsync(async (): Promise<void> => {
                 await router.navigate([initialPath]);
                 const linkElement: HTMLAnchorElement = appComponent.querySelector(`a[title="${clickingTo}"]`) as HTMLAnchorElement;

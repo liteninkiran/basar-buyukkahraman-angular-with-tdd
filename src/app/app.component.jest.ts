@@ -6,12 +6,25 @@ import { HomeComponent } from './home/home.component';
 import { routes } from './router/app-router.module';
 import { SharedModule } from './shared/shared.module';
 import { SignUpComponent } from './sign-up/sign-up.component';
+import { LoginComponent } from './login/login.component';
+import { UserComponent } from './user/user.component';
+import { ActivateComponent } from './activate/activate.component';
 import userEvent from '@testing-library/user-event';
 
 const setup = async (path: string): Promise<void> => {
     const { navigate } = await render(AppComponent, {
-        declarations: [HomeComponent, SignUpComponent],
-        imports: [HttpClientModule, SharedModule, ReactiveFormsModule],
+        declarations: [
+            HomeComponent,
+            SignUpComponent,
+            UserComponent,
+            LoginComponent,
+            ActivateComponent,
+        ],
+        imports: [
+            HttpClientModule,
+            SharedModule,
+            ReactiveFormsModule,
+        ],
         routes: routes,
     });
     await navigate(path);
@@ -19,7 +32,7 @@ const setup = async (path: string): Promise<void> => {
 
 describe('Routing', (): void => {
     const config = {
-        pageId: {
+        routing: {
             name: `Displays '$pageId' when path is '$path'`,
             table: [
                 { path: '/', pageId: 'home-page' },
@@ -27,6 +40,8 @@ describe('Routing', (): void => {
                 { path: '/login', pageId: 'login-page' },
                 { path: '/user/1', pageId: 'user-page' },
                 { path: '/user/2', pageId: 'user-page' },
+                { path: '/activate/123', pageId: 'activation-page' },
+                { path: '/activate/456', pageId: 'activation-page' },
             ],
         },
         link: {
@@ -37,7 +52,7 @@ describe('Routing', (): void => {
                 { path: '/login', title: 'Login' },
             ],
         },
-        page: {
+        navigation: {
             name: `Displays '$visiblePage' after clicking '$clickingTo' link`,
             table: [
                 { initialPath: '/', clickingTo: 'Sign Up', visiblePage: 'sign-up-page' },
@@ -48,7 +63,7 @@ describe('Routing', (): void => {
     }
 
     // Displays '$pageId' when path is '$path'
-    it.each(config.pageId.table)(config.pageId.name, async ({ path, pageId }): Promise<void> => {
+    it.each(config.routing.table)(config.routing.name, async ({ path, pageId }): Promise<void> => {
         await setup(path);
         const page = screen.queryByTestId(pageId);
         expect(page).toBeInTheDocument();
@@ -62,7 +77,7 @@ describe('Routing', (): void => {
     });
 
     // Displays '$visiblePage' after clicking '$clickingTo' link
-    it.each(config.page.table)(config.page.name, async ({ initialPath, clickingTo, visiblePage }): Promise<void> => {
+    it.each(config.navigation.table)(config.navigation.name, async ({ initialPath, clickingTo, visiblePage }): Promise<void> => {
         await setup(initialPath);
         const link = screen.getByRole('link', { name: clickingTo });
         await userEvent.click(link);
