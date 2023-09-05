@@ -16,11 +16,26 @@ export class UserListComponent implements OnInit {
         totalPages: 0,
     }
 
+    get hasNextPage(): boolean {
+        const { page, totalPages } = this.page;
+        return totalPages > page + 1;
+    }
+
+    get hasPreviousPage(): boolean {
+        return this.page.page !== 0;
+    }
+
     constructor(private userService: UserService) { }
 
     public ngOnInit(): void {
+        this.loadData();
+    }
+    
+    public loadData(pageNumber: number = 0) {
         this.userService
-            .loadUsers()
-            .subscribe((res: UserPage) => this.page = res);
+            .loadUsers(pageNumber)
+            .subscribe((res: UserPage) => {
+                this.page = res;
+            });
     }
 }

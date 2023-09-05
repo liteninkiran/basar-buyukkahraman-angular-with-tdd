@@ -27,9 +27,9 @@ export class UserService {
         return this.httpClient.post('/api/1.0/users/token/' + token, {});
     }
 
-    public loadUsers(): Observable<any> {
+    public loadUsers(page: number = 0): Observable<any> {
         return this.httpClient.get('/api/1.0/users', {
-            params: { size: 3},
+            params: { size: 3, page },
         });
     }
 }
