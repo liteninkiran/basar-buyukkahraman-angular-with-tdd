@@ -10,6 +10,7 @@ import { AppRouterModule } from './router/app-router.module';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { ActivateComponent } from './activate/activate.component';
+import { UserListComponent } from './home/user-list/user-list.component';
 
 @NgModule({
     declarations: [
@@ -19,6 +20,7 @@ import { ActivateComponent } from './activate/activate.component';
         LoginComponent,
         UserComponent,
         ActivateComponent,
+        UserListComponent,
     ],
     imports: [
         BrowserModule,

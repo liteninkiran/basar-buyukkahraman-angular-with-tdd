@@ -11,6 +11,7 @@ import { LoginComponent } from './login/login.component';
 import { ActivateComponent } from './activate/activate.component';
 import { routes } from './router/app-router.module';
 import { UserComponent } from './user/user.component';
+import { UserListComponent } from './home/user-list/user-list.component';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -27,6 +28,7 @@ describe('AppComponent', () => {
                 UserComponent,
                 LoginComponent,
                 ActivateComponent,
+                UserListComponent,
             ],
             imports: [
                 RouterTestingModule.withRoutes(routes),

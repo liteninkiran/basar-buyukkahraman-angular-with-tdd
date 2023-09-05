@@ -26,4 +26,8 @@ export class UserService {
     public activate(token: string): Observable<any> {
         return this.httpClient.post('/api/1.0/users/token/' + token, {});
     }
+
+    public loadUsers(): Observable<any> {
+        return this.httpClient.get('/api/1.0/users');
+    }
 }
