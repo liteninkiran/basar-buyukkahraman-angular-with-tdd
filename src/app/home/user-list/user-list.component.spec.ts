@@ -32,7 +32,7 @@ describe('UserListComponent', (): void => {
         fixture.detectChanges();
     });
 
-    it('Displays three users in list', (): void => {
+    it('Displays three users in a list', (): void => {
         const request = httpTestingController.expectOne('/api/1.0/users');
         request.flush(page);
         fixture.detectChanges();

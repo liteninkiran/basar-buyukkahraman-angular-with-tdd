@@ -45,6 +45,7 @@ beforeEach((): void => {
     counter = 0;
     server.resetHandlers();
 });
+//beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
 beforeAll((): void => server.listen());
 afterAll((): void => server.close());
 
@@ -78,4 +79,4 @@ describe('Account Activation Page', (): void => {
         expect(spinner).not.toBeInTheDocument();
     });
 
-})
+});

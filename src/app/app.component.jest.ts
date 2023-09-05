@@ -1,21 +1,40 @@
+// Angular
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { render, screen } from '@testing-library/angular';
+import userEvent from '@testing-library/user-event';
+
+// Components
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
-import { routes } from './router/app-router.module';
-import { SharedModule } from './shared/shared.module';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { ActivateComponent } from './activate/activate.component';
+import { UserListComponent } from './home/user-list/user-list.component';
+
+// Modules
+import { SharedModule } from './shared/shared.module';
+import { routes } from './router/app-router.module';
+
+// MSW
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import userEvent from '@testing-library/user-event';
 
-const url = '/api/1.0/users/token/:token';
-const requestHandler = rest.post(url, (req, res, ctx) => res(ctx.status(200)));
-const server = setupServer(requestHandler);
+const data = {
+    content: [ { id: 1, username: 'user1', email: 'user1@email.com' } ],
+    page: 0,
+    size: 3,
+    totalPages: 1,
+}
+const tokenUrl = '/api/1.0/users/token/:token';
+const userUrl = '/api/1.0/users';
+const tokenResolver = (req: any, res: any, ctx: any) => res(ctx.status(200));
+const userResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json(data));
+
+const tokenHandler = rest.post(tokenUrl, tokenResolver);
+const userHandler = rest.get(userUrl, userResolver);
+const server = setupServer(tokenHandler, userHandler);
 
 beforeEach((): void => server.resetHandlers());
 beforeAll((): void => server.listen());
@@ -29,6 +48,7 @@ const setup = async (path: string): Promise<void> => {
             UserComponent,
             LoginComponent,
             ActivateComponent,
+            UserListComponent,
         ],
         imports: [
             HttpClientModule,
@@ -68,7 +88,7 @@ describe('Routing', (): void => {
                 { initialPath: '/', clickingTo: 'Sign Up', visiblePage: 'sign-up-page' },
                 { initialPath: '/signup', clickingTo: 'Home', visiblePage: 'home-page' },
                 { initialPath: '/', clickingTo: 'Login', visiblePage: 'login-page' },
-                ],
+            ],
         },
     }
 
