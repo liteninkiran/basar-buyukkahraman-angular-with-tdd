@@ -13,7 +13,7 @@ type RouteParams = {
 
 let subscriber!: Subscriber<RouteParams>;
 
-const setup = async () => {
+const setup = async (): Promise<void> => {
     const observable = new Observable<RouteParams>(sub => subscriber = sub);
     await render(ActivateComponent, {
         declarations: [AlertComponent],
@@ -32,12 +32,13 @@ const setup = async () => {
 let counter = 0;
 
 const url = '/api/1.0/users/token/:token';
-const requestHandler = rest.post(url, (req, res, ctx) => {
+const resolver = (req: any, res: any, ctx: any): any => {
     counter += 1;
     return req.params['token'] === '456'
         ? res(ctx.status(400), ctx.json({}))
         : res(ctx.status(200));
-});
+}
+const requestHandler = rest.post(url, resolver);
 const server = setupServer(requestHandler);
 
 beforeEach((): void => {
@@ -68,4 +69,13 @@ describe('Account Activation Page', (): void => {
         const message = await screen.findByText('Activation failure');
         expect(message).toBeInTheDocument();
     });
+
+    it('Displays spinner during activation request', async (): Promise<void> => {
+        await setup();
+        subscriber.next({ id: '456' });
+        const spinner = await screen.findByRole('status');
+        await screen.findByText('Activation failure');
+        expect(spinner).not.toBeInTheDocument();
+    });
+
 })
