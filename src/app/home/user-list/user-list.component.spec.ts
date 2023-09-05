@@ -69,7 +69,7 @@ describe('UserListComponent', (): void => {
         expect(request.request.params.get('size')).toBe(3);
     });
 
-    xit('Displays next page button', (): void => {
+    it('Displays next page button', (): void => {
         const request = httpTestingController.expectOne(() => true);
         request.flush(getPage(0, 3));
         fixture.detectChanges();
@@ -77,7 +77,7 @@ describe('UserListComponent', (): void => {
         expect(nextPageButton).toBeTruthy();
     });
 
-    xit('Request next page after clicking next page button', (): void => {
+    it('Request next page after clicking next page button', (): void => {
         const request = httpTestingController.expectOne(() => true);
         request.flush(getPage(0, 3));
         fixture.detectChanges();
@@ -92,7 +92,9 @@ describe('UserListComponent', (): void => {
         request.flush(getPage(2, 3));
         fixture.detectChanges();
         const nextPageButton = fixture.nativeElement.querySelector(selectors.nextButton);
+        const prevPageButton = fixture.nativeElement.querySelector(selectors.prevButton);
         expect(nextPageButton).toBeFalsy();
+        expect(prevPageButton).toBeTruthy();
     });
 
     it('Does not display previous page button at first page', (): void => {
@@ -105,7 +107,7 @@ describe('UserListComponent', (): void => {
         expect(prevPageButton).toBeFalsy();
     });
 
-    xit('Displays previous page button in page 2', (): void => {
+    it('Displays previous page button in page 2', (): void => {
         const request = httpTestingController.expectOne(() => true);
         request.flush(getPage(1, 3));
         fixture.detectChanges();
@@ -113,7 +115,7 @@ describe('UserListComponent', (): void => {
         expect(previousPageButton).toBeTruthy();
     });
 
-    xit('Displays previous page after clicking previous page button', (): void => {
+    it('Displays previous page after clicking previous page button', (): void => {
         const request = httpTestingController.expectOne(() => true);
         request.flush(getPage(1, 3));
         fixture.detectChanges();
