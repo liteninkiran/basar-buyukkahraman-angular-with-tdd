@@ -28,6 +28,8 @@ export class UserService {
     }
 
     public loadUsers(): Observable<any> {
-        return this.httpClient.get('/api/1.0/users');
+        return this.httpClient.get('/api/1.0/users', {
+            params: { size: 3},
+        });
     }
 }
