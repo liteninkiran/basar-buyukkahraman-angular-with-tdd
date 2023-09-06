@@ -19,6 +19,7 @@ describe('UserListComponent', (): void => {
     const selectors = {
         nextButton: 'button[data-testid="next-button"]',
         prevButton: 'button[data-testid="previous-button"]',
+        status: 'span[role="status"]',
     }
 
     beforeEach(async (): Promise<void> => {
@@ -103,6 +104,14 @@ describe('UserListComponent', (): void => {
         previousPageButton.click();
         const previousPageRequest = httpTestingController.expectOne(() => true);
         expect(previousPageRequest.request.params.get('page')).toBe(0);
+    });
+
+    it('Displays spinner during the API call', (): void => {
+        const request = httpTestingController.expectOne(() => true);
+        expect(fixture.nativeElement.querySelector(selectors.status)).toBeTruthy();
+        request.flush(getPage(0, 3));
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector(selectors.status)).toBeFalsy();
     });
 
 });

@@ -9,6 +9,8 @@ import { UserPage } from 'src/app/shared/types';
 })
 export class UserListComponent implements OnInit {
 
+    public fetchingData = false;
+
     public page: UserPage = {
         content: [],
         page: 0,
@@ -32,10 +34,12 @@ export class UserListComponent implements OnInit {
     }
     
     public loadData(pageNumber: number = 0) {
+        this.fetchingData = true;
         this.userService
             .loadUsers(pageNumber)
             .subscribe((res: UserPage) => {
                 this.page = res;
+                this.fetchingData = false;
             });
     }
 }

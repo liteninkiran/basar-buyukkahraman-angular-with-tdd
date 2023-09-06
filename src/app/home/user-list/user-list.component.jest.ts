@@ -37,42 +37,42 @@ describe('User List', (): void => {
     it('Displays next page button', async (): Promise<void> => {
         await setup();
         await screen.findByText('user1');
-        expect(screen.queryByText('next >')).toBeInTheDocument();
+        expect(screen.queryByText('Next >')).toBeInTheDocument();
     });
 
     it('Displays next page after clicking next page button', async (): Promise<void> => {
         await setup();
         await screen.findByText('user1');
-        await userEvent.click(screen.getByText('next >'));
+        await userEvent.click(screen.getByText('Next >'));
         const firstUserInPage2 = await screen.findByText('user4');
         expect(firstUserInPage2).toBeInTheDocument();
     });
 
     it('Does not display next page at last page', async (): Promise<void> => {
         await setup();
-        await screen.findByText('user1'); await userEvent.click(screen.getByText('next >'));
-        await screen.findByText('user4'); await userEvent.click(screen.getByText('next >'));
+        await screen.findByText('user1'); await userEvent.click(screen.getByText('Next >'));
+        await screen.findByText('user4'); await userEvent.click(screen.getByText('Next >'));
         await screen.findByText('user7');
-        expect(screen.queryByText('next >')).not.toBeInTheDocument();
+        expect(screen.queryByText('Next >')).not.toBeInTheDocument();
     });
 
     it('Does not display previous page button at first page', async (): Promise<void> => {
         await setup();
         await screen.findByText('user1');
-        expect(screen.queryByText('< previous')).not.toBeInTheDocument();
+        expect(screen.queryByText('< Previous')).not.toBeInTheDocument();
     });
 
     it('Displays previous page button in page 2', async (): Promise<void> => {
         await setup();
-        await screen.findByText('user1'); await userEvent.click(screen.getByText('next >'));
+        await screen.findByText('user1'); await userEvent.click(screen.getByText('Next >'));
         await screen.findByText('user4');
-        expect(screen.queryByText('< previous')).toBeInTheDocument();
+        expect(screen.queryByText('< Previous')).toBeInTheDocument();
     });
 
     it('Displays previous page after clicking previous page button', async (): Promise<void> => {
         await setup();
-        await screen.findByText('user1'); await userEvent.click(screen.getByText('next >'));
-        await screen.findByText('user4'); await userEvent.click(screen.getByText('< previous'));
+        await screen.findByText('user1'); await userEvent.click(screen.getByText('Next >'));
+        await screen.findByText('user4'); await userEvent.click(screen.getByText('< Previous'));
         const firstUserInPage1 = await screen.findByText('user1');
         expect(firstUserInPage1).toBeInTheDocument();
     });
