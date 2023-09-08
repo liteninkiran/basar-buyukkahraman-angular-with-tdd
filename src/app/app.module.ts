@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { SharedModule } from './shared/shared.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Components
 import { AppComponent } from './app.component';
@@ -35,6 +35,7 @@ import { UserListItemComponent } from './home/user-list-item/user-list-item.comp
         SharedModule,
         ReactiveFormsModule,
         AppRouterModule,
+        FormsModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

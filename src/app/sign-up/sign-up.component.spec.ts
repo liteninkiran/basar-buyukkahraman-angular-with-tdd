@@ -139,8 +139,6 @@ describe('SignUpComponent', () => {
             signUp = fixture.nativeElement as HTMLElement;
             button = signUp.querySelector('button') as HTMLButtonElement;
 
-            await fixture.whenStable();
-
             // Store input elements
             inputConfigs = [
                 { input: signUp.querySelector(selectors.username) as HTMLInputElement, setValue: username },

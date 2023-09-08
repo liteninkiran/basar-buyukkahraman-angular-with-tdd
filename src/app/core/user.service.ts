@@ -36,4 +36,8 @@ export class UserService {
     public getUserById(id: string): Observable<any> {
         return this.httpClient.get('/api/1.0/users/' + id);
     }
+
+    public authenticate(email: string, password: string): Observable<any> {
+        return this.httpClient.post('/api/1.0/auth', { email, password });
+    }
 }
