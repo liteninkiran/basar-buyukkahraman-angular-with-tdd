@@ -29,13 +29,23 @@ const data = {
     totalPages: 1,
 }
 const tokenUrl = '/api/1.0/users/token/:token';
-const userUrl = '/api/1.0/users';
+const usersUrl = '/api/1.0/users';
+const userUrl = '/api/1.0/users/:id';
 const tokenResolver = (req: any, res: any, ctx: any) => res(ctx.status(200));
-const userResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json(data));
+const usersResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json(data));
+const userResolver = (req: any, res: any, ctx: any) => {
+    const id = Number(req.params['id']);
+    return res(ctx.status(200), ctx.json({
+        id,
+        username: `user${id}`,
+        email: `user${id}@mail.com`,
+    }));
+}
 
 const tokenHandler = rest.post(tokenUrl, tokenResolver);
+const usersHandler = rest.get(usersUrl, usersResolver);
 const userHandler = rest.get(userUrl, userResolver);
-const server = setupServer(tokenHandler, userHandler);
+const server = setupServer(tokenHandler, usersHandler, userHandler);
 
 beforeEach((): void => server.resetHandlers());
 beforeAll((): void => server.listen());

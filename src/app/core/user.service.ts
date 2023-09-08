@@ -32,4 +32,8 @@ export class UserService {
             params: { size: 3, page },
         });
     }
+
+    public getUserById(id: string): Observable<any> {
+        return this.httpClient.get('/api/1.0/users/' + id);
+    }
 }
