@@ -77,6 +77,13 @@ describe('User List', (): void => {
         expect(firstUserInPage1).toBeInTheDocument();
     });
 
+    it('Displays spinner during the API call', async () => {
+        await setup();
+        const spinner = screen.getByRole('status')
+        await screen.findByText('user1');
+        expect(spinner).not.toBeInTheDocument();
+    });
+
 });
 
 
