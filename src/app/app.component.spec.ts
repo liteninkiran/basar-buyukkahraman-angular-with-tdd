@@ -41,6 +41,7 @@ describe('AppComponent', () => {
             ],
         }).compileComponents();
     });
+
     beforeEach((): void => {
         fixture = TestBed.createComponent(AppComponent);
         router = TestBed.inject(Router);
@@ -75,7 +76,7 @@ describe('AppComponent', () => {
             ],
         }
 
-        // Displays correct pageId for each path'
+        // Displays correct pageId for each path
         tests.routing.forEach(({ path, pageId }): void => {
             it(`Displays '${pageId}' when path is '${path}'`, async (): Promise<void> => {
                 await router.navigate([path]);
@@ -106,7 +107,7 @@ describe('AppComponent', () => {
             }));
         });
 
-        it('Navigates to user page when clicking the username on user list', fakeAsync(async (): Promise<void> => {
+        it('Navigates to the user page when clicking the username on user list', fakeAsync(async (): Promise<void> => {
             let selector = '.list-group-item';
             await router.navigate(['/']);
             fixture.detectChanges();

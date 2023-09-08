@@ -92,26 +92,34 @@ describe('Routing', (): void => {
         },
     }
 
-    // Displays '$pageId' when path is '$path'
+    // Displays correct pageId for each path
     it.each(config.routing.table)(config.routing.name, async ({ path, pageId }): Promise<void> => {
         await setup(path);
         const page = screen.queryByTestId(pageId);
         expect(page).toBeInTheDocument();
     });
 
-    // Has link with title '$title' to '$path'
+    // Has link with correct title for each path
     it.each(config.link.table)(config.link.name, async ({ path, title }): Promise<void> => {
         await setup(path);
         const link = screen.queryByRole('link', { name: title });
         expect(link).toBeInTheDocument();
     });
 
-    // Displays '$visiblePage' after clicking '$clickingTo' link
+    // Displays correct page after clicking each link
     it.each(config.navigation.table)(config.navigation.name, async ({ initialPath, clickingTo, visiblePage }): Promise<void> => {
         await setup(initialPath);
         const link = screen.getByRole('link', { name: clickingTo });
         await userEvent.click(link);
         const page = await screen.findByTestId(visiblePage);
+        expect(page).toBeInTheDocument();
+    });
+
+    it('Navigates to the user page when clicking the username on user list', async (): Promise<void> => {
+        await setup('/');
+        const userListItem = await screen.findByText('user1');
+        await userEvent.click(userListItem);
+        const page = await screen.findByTestId('user-page');
         expect(page).toBeInTheDocument();
     });
 });
