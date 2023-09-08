@@ -3,7 +3,7 @@
         <h3>Users</h3>
     </div>
     <ul class="list-group list-group-flush">
-        <li class="list-group-item list-grou-item-action" *ngFor="let user of page.content">
+        <li class="list-group-item list-grou-item-action" *ngFor="let user of page.content" (click)="navigate(user.id)">
             {{ user.username }}
         </li>
     </ul>

@@ -2,6 +2,7 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserListComponent } from './user-list.component';
 import { getPage } from './test-helper';
+import { RouterTestingModule } from '@angular/router/testing';
 
 const parsePageParams = (request: TestRequest) => {
     let size = Number.parseInt(request.request.params.get('size')!);
@@ -25,7 +26,7 @@ describe('UserListComponent', (): void => {
     beforeEach(async (): Promise<void> => {
         await TestBed.configureTestingModule({
             declarations: [UserListComponent],
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, RouterTestingModule],
         }).compileComponents();
     });
 

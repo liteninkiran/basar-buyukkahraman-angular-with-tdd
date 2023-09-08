@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../core/user.service';
 import { UserPage } from 'src/app/shared/types';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-user-list',
@@ -10,7 +11,6 @@ import { UserPage } from 'src/app/shared/types';
 export class UserListComponent implements OnInit {
 
     public fetchingData = false;
-
     public page: UserPage = {
         content: [],
         page: 0,
@@ -27,13 +27,16 @@ export class UserListComponent implements OnInit {
         return this.page.page !== 0;
     }
 
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService,
+        private router: Router,
+    ) { }
 
     public ngOnInit(): void {
         this.loadData();
     }
     
-    public loadData(pageNumber: number = 0) {
+    public loadData(pageNumber: number = 0): void {
         this.fetchingData = true;
         this.userService
             .loadUsers(pageNumber)
@@ -41,5 +44,9 @@ export class UserListComponent implements OnInit {
                 this.page = res;
                 this.fetchingData = false;
             });
+    }
+
+    public navigate(id: number): void {
+        this.router.navigate(['/user/', id]);
     }
 }
