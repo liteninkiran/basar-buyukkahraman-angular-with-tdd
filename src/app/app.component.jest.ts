@@ -20,6 +20,7 @@ import { routes } from './router/app-router.module';
 // MSW
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { UserListItemComponent } from './home/user-list-item/user-list-item.component';
 
 const data = {
     content: [ { id: 1, username: 'user1', email: 'user1@email.com' } ],
@@ -49,6 +50,7 @@ const setup = async (path: string): Promise<void> => {
             LoginComponent,
             ActivateComponent,
             UserListComponent,
+            UserListItemComponent,
         ],
         imports: [
             HttpClientModule,

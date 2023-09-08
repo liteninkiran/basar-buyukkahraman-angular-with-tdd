@@ -1,10 +1,16 @@
+// Angular
 import { HttpClientModule } from '@angular/common/http';
-import { render, screen, waitFor } from '@testing-library/angular';
-import { UserListComponent } from './user-list.component';
+import { RenderComponentOptions, render, screen, waitFor } from '@testing-library/angular';
+import userEvent from '@testing-library/user-event';
+
+// MSW
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+
+// Components
+import { UserListItemComponent } from '../user-list-item/user-list-item.component';
+import { UserListComponent } from './user-list.component';
 import { getPage } from './test-helper';
-import userEvent from '@testing-library/user-event';
 
 const url = '/api/1.0/users';
 const resolver = (req: any, res: any, ctx: any) => {
@@ -22,9 +28,11 @@ beforeEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
 const setup = async (): Promise<void> => {
-    await render(UserListComponent, {
+    const options: RenderComponentOptions<UserListComponent> = {
         imports: [HttpClientModule],
-    });
+        declarations: [UserListItemComponent],
+    }
+    await render(UserListComponent, options);
 }
 
 describe('User List', (): void => {
