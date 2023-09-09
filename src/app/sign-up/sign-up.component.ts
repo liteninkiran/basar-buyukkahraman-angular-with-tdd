@@ -125,7 +125,7 @@ export class SignUpComponent implements OnInit {
             || this.passwordError
             || this.confirmPasswordError;
 
-        return (!formFilled || validationError || this.apiProgress);
+        return (!formFilled || validationError);
     }
 
     private toggleApi(): void {

@@ -95,13 +95,14 @@ describe('LoginComponent', () => {
         let httpTestingController: HttpTestingController;
         let loginPage: HTMLElement;
 
-        const setupForm = async (): Promise<void> => {
+        const setupForm = async (email = testUser.email): Promise<void> => {
             httpTestingController = TestBed.inject(HttpTestingController);
             loginPage = fixture.nativeElement as HTMLElement;
             await fixture.whenStable();
             const emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
             const passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
-            emailInput.value = testUser.email;
+            console.log();
+            emailInput.value = email;
             emailInput.dispatchEvent(new Event('input'));
             emailInput.dispatchEvent(new Event('blur'));
             passwordInput.value = testUser.password;
@@ -113,6 +114,11 @@ describe('LoginComponent', () => {
         it('Enables the button when all the fields have valid input', async (): Promise<void> => {
             await setupForm();
             expect(button?.disabled).toBeFalsy();
+        });
+
+        it('Does not enable button when fields are invalid', async (): Promise<void> => {
+            await setupForm('a');
+            expect(button?.disabled).toBeTruthy();
         });
 
         it('Sends email and password to backend after clicking the button', async (): Promise<void> => {
@@ -160,4 +166,30 @@ describe('LoginComponent', () => {
             expect(loginPage.querySelector(selectors.status)).toBeFalsy();
         });
     });
+
+    describe('Validation', (): void => {
+        const testCases = [
+            { field: 'email', value: '', error: 'Email is required' },
+            { field: 'email', value: 'wrong-format', error: 'Invalid email address' },
+            { field: 'password', value: '', error: 'Password is required' },
+        ];
+
+        testCases.forEach(({ field, value, error }): void => {
+            it(`Displays ${error} when ${field} has '${value}'`, async (): Promise<void> => {
+                await fixture.whenStable();
+                const loginPage = fixture.nativeElement as HTMLElement;
+                const validationSelector = `div[data-testid="${field}-validation"]`;
+                const inputSelector = `input[id="${field}"]`;
+                expect(loginPage.querySelector(validationSelector)).toBeNull();
+                const input = loginPage.querySelector(inputSelector) as HTMLInputElement;
+                input.value = value;
+                input.dispatchEvent(new Event('input'));
+                input.dispatchEvent(new Event('blur'));
+                fixture.detectChanges();
+                const validationElement = loginPage.querySelector(validationSelector);
+                expect(validationElement?.textContent).toContain(error);
+            })
+        })
+    })
+
 });
