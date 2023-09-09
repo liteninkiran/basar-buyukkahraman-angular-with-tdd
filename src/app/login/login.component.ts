@@ -3,6 +3,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from '../core/user.service';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../core/authentication.service';
+import { User } from '../shared/types';
 
 @Component({
     selector: 'app-login',
@@ -22,6 +24,7 @@ export class LoginComponent implements OnInit {
     constructor(
         private userService: UserService,
         private router: Router,
+        private authService: AuthenticationService,
     ) { }
 
     public ngOnInit(): void {
@@ -39,8 +42,9 @@ export class LoginComponent implements OnInit {
         this.userService
             .authenticate(this.email, this.password)
             .subscribe({
-                next: () => {
+                next: (body: any) => {
                     this.router.navigate(['/']);
+                    this.authService.setLoggedInUser(body as User);
                 },
                 error: (err: HttpErrorResponse) => {
                     this.error = err.error.message;

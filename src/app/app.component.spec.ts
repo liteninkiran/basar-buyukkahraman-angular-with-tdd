@@ -24,6 +24,7 @@ describe('AppComponent', () => {
     let location: Location;
 
     const testUser = {
+        username: 'user1',
         password: 'P4ssword',
         email: 'user1@mail.com',
     }
@@ -40,6 +41,13 @@ describe('AppComponent', () => {
         status: 'span[role="status"]',
         alert: '.alert',
         homePage: '[data-testid="home-page"]',
+        userPage: '[data-testid="user-page"]',
+        links: {
+            login: 'a[title="Login"]',
+            signUp: 'a[title="Sign Up"]',
+            myProfile: 'a[title="My Profile"]',
+        },
+        userListItem: '.list-group-item',
     }
 
     beforeEach(async (): Promise<void> => {
@@ -130,23 +138,21 @@ describe('AppComponent', () => {
         });
 
         it('Navigates to the user page when clicking the username on user list', fakeAsync(async (): Promise<void> => {
-            let selector = '.list-group-item';
             await router.navigate(['/']);
             fixture.detectChanges();
             const request = httpTestingController.expectOne(() => true);
             request.flush({
-                content: [ { id: 1, username: 'user1', email: 'user1@mail.com' } ],
+                content: [ { id: 1, username: testUser.username, email: testUser.email } ],
                 page: 0,
                 size: 3,
                 totalPages: 1,
             })
             fixture.detectChanges();
-            const linkToUserPage = fixture.nativeElement.querySelector(selector);
+            const linkToUserPage = fixture.nativeElement.querySelector(selectors.userListItem);
             linkToUserPage.click();
             tick();
             fixture.detectChanges();
-            selector = '[data-testid="user-page"]';
-            const page = appComponent.querySelector(selector);
+            const page = appComponent.querySelector(selectors.userPage);
             expect(page).toBeTruthy();
             expect(location.path()).toEqual('/user/1');
         }));
@@ -160,33 +166,79 @@ describe('AppComponent', () => {
         let emailInput: HTMLInputElement;
         let passwordInput: HTMLInputElement;
 
-        const setupForm = async (email = testUser.email): Promise<void> => {
+        const setupLogin = fakeAsync(async (): Promise<void> => {
             httpTestingController = TestBed.inject(HttpTestingController);
-            loginPage = fixture.nativeElement as HTMLElement;
-            await fixture.whenStable();
-            emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
-            passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
-            console.log();
-            emailInput.value = email;
-            emailInput.dispatchEvent(new Event('input'));
-            emailInput.dispatchEvent(new Event('blur'));
-            passwordInput.value = testUser.password;
-            passwordInput.dispatchEvent(new Event('input'));
-            fixture.detectChanges();
-            button = loginPage.querySelector('button');
-        }
 
-        it('Navigates to home after successful login', fakeAsync(async (): Promise<void> => {
+            // Navigate to login page
             await router.navigate(['/login']);
             fixture.detectChanges();
-            await setupForm();
-            button.click();
-            const request = httpTestingController.expectOne(() => true);
-            request.flush({});
+
+            // Wait for login form to be ready
+            loginPage = fixture.nativeElement as HTMLElement;
+            await fixture.whenStable();
+
+            // Enter email
+            emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
+            emailInput.value = testUser.email;
+            emailInput.dispatchEvent(new Event('input'));
+            emailInput.dispatchEvent(new Event('blur'));
+
+            // Enter password
+            passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
+            passwordInput.value = testUser.password;
+            passwordInput.dispatchEvent(new Event('input'));
+
+            // Update UI
             fixture.detectChanges();
+
+            // Click the submit button to login
+            button = loginPage.querySelector('button');
+            button.click();
+
+            // Store the request
+            const request = httpTestingController.expectOne(() => true);
+
+            // Resolve request
+            request.flush({
+                id: 1,
+                username: testUser.username,
+                email: testUser.email,
+            });
+
+            // Update UI
+            fixture.detectChanges();
+
+            // Simulate the asynchronous passage of time for the timer in the fakeAsync zone
             tick();
+        });
+
+        it('Navigates to home after successful login', async (): Promise<void> => {
+            await setupLogin();
             const page = appComponent.querySelector(selectors.homePage);
             expect(page).toBeTruthy();
-        }));
+        });
+
+        it('Hides login/sign-up links from navbar after successful login', async (): Promise<void> => {
+            await setupLogin();
+            const loginLink: HTMLAnchorElement = appComponent.querySelector(selectors.links.login) as HTMLAnchorElement;
+            const signUpLink: HTMLAnchorElement = appComponent.querySelector(selectors.links.signUp) as HTMLAnchorElement;
+            expect(loginLink).toBeFalsy();
+            expect(signUpLink).toBeFalsy();
+        });
+
+        it('Displays my-profile link in navbar after successful login', async (): Promise<void> => {
+            await setupLogin();
+            const profileLink: HTMLAnchorElement = appComponent.querySelector(selectors.links.myProfile) as HTMLAnchorElement;
+            expect(profileLink).toBeTruthy();
+        });
+
+        it('Displays user-page with logged-in user ID in URL after clicking my-profile link on navbar', async (): Promise<void> => {
+            await setupLogin();
+            const profileLink: HTMLAnchorElement = appComponent.querySelector(selectors.links.myProfile) as HTMLAnchorElement;
+            await profileLink.click();
+            const page = appComponent.querySelector(selectors.userPage);
+            expect(page).toBeTruthy();
+            expect(location.path()).toEqual('/user/1');
+        });
     });
 });

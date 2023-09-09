@@ -5,8 +5,9 @@
             Hoaxify
         </a>
         <ul class="navbar-nav">
-            <a class="nav-link" routerLink="/signup" title="Sign Up">Sign Up</a>
-            <a class="nav-link" routerLink="/login" title="Login">Login</a>
+            <a class="nav-link" routerLink="/signup" title="Sign Up" *ngIf="!authService.loggedInUser.isLoggedIn">Sign Up</a>
+            <a class="nav-link" routerLink="/login" title="Login" *ngIf="!authService.loggedInUser.isLoggedIn">Login</a>
+            <a class="nav-link" [routerLink]="'/user/' + authService.loggedInUser.id" title="My Profile" *ngIf="authService.loggedInUser.isLoggedIn">My Profile</a>
         </ul>
     </div>
 </nav>
