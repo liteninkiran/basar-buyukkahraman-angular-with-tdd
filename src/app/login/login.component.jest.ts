@@ -17,11 +17,12 @@ import { LoginComponent } from './login.component';
 let requestBody: any;
 let counter = 0;
 
+const failingEmail = 'failing-user@mail.com';
 const url = '/api/1.0/auth';
 const resolver = (req: any, res: any, ctx: any) => {
     requestBody = req.body;
     counter += 1;
-    return (requestBody.email === 'failing-user@mail.com')
+    return (requestBody.email === failingEmail)
         ? res(ctx.status(401), ctx.json({ message: 'Incorrect Credentials' }))
         : res(ctx.status(200), ctx.json({}));
 }
@@ -91,13 +92,15 @@ describe('LoginComponent', (): void => {
     describe('Interactions', (): void => {
 
         let button: any;
+        let emailInput : HTMLInputElement;
+        let passwordInput : HTMLInputElement;
 
         const setupForm = async (values?: { email: string }): Promise<void> => {
             await setup();
-            const email = screen.getByLabelText('Email');
-            const password = screen.getByLabelText('Password');
-            await userEvent.type(email, values?.email || testUser.email);
-            await userEvent.type(password, testUser.password);
+            emailInput = screen.getByLabelText('Email');
+            passwordInput = screen.getByLabelText('Password');
+            await userEvent.type(emailInput, values?.email || testUser.email);
+            await userEvent.type(passwordInput, testUser.password);
             button = screen.getByRole('button', { name: 'Login' });
         };
 
@@ -127,14 +130,14 @@ describe('LoginComponent', (): void => {
         });
 
         it('Displays validation error coming from backend after submit failure', async (): Promise<void> => {
-            await setupForm({ email: 'failing-user@mail.com' });
+            await setupForm({ email: failingEmail });
             await userEvent.click(button);
             const errorMessage = await screen.findByText('Incorrect Credentials');
             expect(errorMessage).toBeInTheDocument();
         });
 
         it('Hides spinner after Login request fails', async (): Promise<void> => {
-            await setupForm({ email: 'failing-user@mail.com' });
+            await setupForm({ email: failingEmail });
             await userEvent.click(button);
             await screen.findByText('Incorrect Credentials');
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -143,6 +146,22 @@ describe('LoginComponent', (): void => {
         it('Does not enable button when fields are invalid', async (): Promise<void> => {
             await setupForm({ email: 'a' });
             expect(button).toBeDisabled();
+        });
+
+        it('Clears authentication fail message when email field is changed', async (): Promise<void> => {
+            await setupForm({ email: failingEmail });
+            await userEvent.click(button);
+            const errorMessage = await screen.findByText('Incorrect Credentials');
+            await userEvent.type(emailInput, 'new@mail.com')
+            expect(errorMessage).not.toBeInTheDocument();
+        });
+
+        it('clears authentication fail message when password field is changed', async (): Promise<void> => {
+            await setupForm({ email: failingEmail });
+            await userEvent.click(button);
+            const errorMessage = await screen.findByText('Incorrect Credentials');
+            await userEvent.type(passwordInput, 'P4ssword2')
+            expect(errorMessage).not.toBeInTheDocument();
         });
     });
 
