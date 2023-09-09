@@ -49,4 +49,8 @@ export class LoginComponent implements OnInit {
         const { invalid, dirty, touched } = field;
         return invalid && (dirty || touched);
     }
+
+    public onChange(): void {
+        this.error = '';
+    }
 }

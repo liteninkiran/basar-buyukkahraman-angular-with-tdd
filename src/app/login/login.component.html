@@ -27,6 +27,7 @@
                     email
                     #emailInput="ngModel"
                     [ngClass]="isInvalid(emailInput.control) ? 'is-invalid' : ''"
+                    (ngModelChange)="onChange()"
                 >
 
                 <!-- Error Messages -->
@@ -52,6 +53,7 @@
                     required
                     #passwordInput="ngModel"
                     [ngClass]="isInvalid(passwordInput.control) ? 'is-invalid' : ''"
+                    (ngModelChange)="onChange()"
                 >
 
                 <!-- Error Messages -->

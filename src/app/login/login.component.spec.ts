@@ -94,13 +94,20 @@ describe('LoginComponent', () => {
         let button: any;
         let httpTestingController: HttpTestingController;
         let loginPage: HTMLElement;
+        let emailInput: HTMLInputElement;
+        let passwordInput: HTMLInputElement;
+
+        const flushConfig = {
+            body: { message: 'Incorrect Credentials' },
+            opts: { status: 401, statusText: 'Unauthorised' },
+        }
 
         const setupForm = async (email = testUser.email): Promise<void> => {
             httpTestingController = TestBed.inject(HttpTestingController);
             loginPage = fixture.nativeElement as HTMLElement;
             await fixture.whenStable();
-            const emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
-            const passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
+            emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
+            passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
             console.log();
             emailInput.value = email;
             emailInput.dispatchEvent(new Event('input'));
@@ -151,7 +158,7 @@ describe('LoginComponent', () => {
             await setupForm();
             button.click();
             const req = httpTestingController.expectOne(url);
-            req.flush({ message: 'Incorrect Credentials' }, { status: 401, statusText: 'Unauthorised' });
+            req.flush(flushConfig.body, flushConfig.opts);
             fixture.detectChanges();
             const error: HTMLDivElement = loginPage.querySelector(selectors.alert) as HTMLDivElement;
             expect(error.textContent).toContain('Incorrect Credentials');
@@ -161,9 +168,33 @@ describe('LoginComponent', () => {
             await setupForm();
             button.click();
             const req = httpTestingController.expectOne(url);
-            req.flush({ message: 'Incorrect Credentials' }, { status: 401, statusText: 'Unauthorised' });
+            req.flush(flushConfig.body, flushConfig.opts);
             fixture.detectChanges();
             expect(loginPage.querySelector(selectors.status)).toBeFalsy();
+        });
+
+        it('Clears error after email field is changed', async (): Promise<void> => {
+            await setupForm();
+            button.click();
+            const req = httpTestingController.expectOne(url);
+            req.flush(flushConfig.body, flushConfig.opts);
+            fixture.detectChanges();
+            emailInput.value = 'valid@mail.com';
+            emailInput.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+            expect(loginPage.querySelector(selectors.alert)).toBeFalsy();
+        });
+
+        it('Clears error after password field is changed', async (): Promise<void> => {
+            await setupForm();
+            button.click();
+            const req = httpTestingController.expectOne(url);
+            req.flush(flushConfig.body, flushConfig.opts);
+            fixture.detectChanges();
+            passwordInput.value = 'P4ssword2';
+            passwordInput.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+            expect(loginPage.querySelector(selectors.alert)).toBeFalsy();
         });
     });
 
