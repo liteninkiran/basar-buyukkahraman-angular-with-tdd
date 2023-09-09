@@ -138,6 +138,34 @@ describe('LoginComponent', (): void => {
             await userEvent.click(button);
             await screen.findByText('Incorrect Credentials');
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
-        })
+        });
+
+        it('Does not enable button when fields are invalid', async (): Promise<void> => {
+            await setupForm({ email: 'a' });
+            expect(button).toBeDisabled();
+        });
     });
+
+    describe('Validation', (): void => {
+
+        const config = {
+            name: `Displays '$message' when '$label' has the value '$inputValue'`,
+            table: [
+                { label: 'Email', inputValue: '{space}{backspace}', message: 'Email is required' },
+                { label: 'Email', inputValue: 'wrong-format', message: 'Invalid email address' },
+                { label: 'Password', inputValue: '{space}{backspace}', message: 'Password is required' },
+            ],
+        }
+    
+        it.each(config.table)(config.name, async ({ label, inputValue, message }): Promise<void> => {
+            await setup();
+            expect(screen.queryByText(message)).not.toBeInTheDocument();
+            const input = screen.getByLabelText(label);
+            await userEvent.type(input, inputValue);
+            await userEvent.tab();
+            const errorMessage = await screen.findByText(message);
+            expect(errorMessage).toBeInTheDocument();
+        });
+    });
+
 });
