@@ -1,6 +1,6 @@
 // Angular
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { render, screen } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 
@@ -66,6 +66,7 @@ const setup = async (path: string): Promise<void> => {
             HttpClientModule,
             SharedModule,
             ReactiveFormsModule,
+            FormsModule,
         ],
         routes: routes,
     });

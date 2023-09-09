@@ -29,8 +29,7 @@ export class LoginComponent implements OnInit {
             .authenticate(this.email, this.password)
             .subscribe({
                 next: () => {
-                    this.apiProgress = false;
-                    console.log('Logged in');
+
                 },
                 error: (err: HttpErrorResponse) => {
                     this.error = err.error.message;
