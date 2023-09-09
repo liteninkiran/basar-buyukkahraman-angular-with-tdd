@@ -1,9 +1,9 @@
-import { HttpClientModule } from "@angular/common/http";
-import { ActivatedRoute } from "@angular/router";
-import { render, screen, waitFor } from "@testing-library/angular";
-import { Observable, Subscriber } from "rxjs";
-import { AlertComponent } from "../shared/alert/alert.component";
-import { ActivateComponent } from "./activate.component";
+import { HttpClientModule } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
+import { render, screen, waitFor } from '@testing-library/angular';
+import { Observable, Subscriber } from 'rxjs';
+import { AlertComponent } from '../shared/alert/alert.component';
+import { ActivateComponent } from './activate.component';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 

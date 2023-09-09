@@ -22,8 +22,13 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import { UserListItemComponent } from './home/user-list-item/user-list-item.component';
 
+const testUser = {
+    username: 'user1',
+    password: 'P4ssword',
+    email: 'user1@mail.com',
+}
 const data = {
-    content: [ { id: 1, username: 'user1', email: 'user1@email.com' } ],
+    content: [ { id: 1, username: testUser.username, email: testUser.email } ],
     page: 0,
     size: 3,
     totalPages: 1,
@@ -31,6 +36,7 @@ const data = {
 const tokenUrl = '/api/1.0/users/token/:token';
 const usersUrl = '/api/1.0/users';
 const userUrl = '/api/1.0/users/:id';
+const authUrl = '/api/1.0/auth';
 const tokenResolver = (req: any, res: any, ctx: any) => res(ctx.status(200));
 const usersResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json(data));
 const userResolver = (req: any, res: any, ctx: any) => {
@@ -41,11 +47,13 @@ const userResolver = (req: any, res: any, ctx: any) => {
         email: `user${id}@mail.com`,
     }));
 }
+const authResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json({ id: 1, username: testUser.username }));
 
 const tokenHandler = rest.post(tokenUrl, tokenResolver);
 const usersHandler = rest.get(usersUrl, usersResolver);
 const userHandler = rest.get(userUrl, userResolver);
-const server = setupServer(tokenHandler, usersHandler, userHandler);
+const authHandler = rest.post(authUrl, authResolver);
+const server = setupServer(tokenHandler, usersHandler, userHandler, authHandler);
 
 beforeEach((): void => server.resetHandlers());
 beforeAll((): void => server.listen());
@@ -135,4 +143,28 @@ describe('Routing', (): void => {
         const page = await screen.findByTestId('user-page');
         expect(page).toBeInTheDocument();
     });
+});
+
+describe('Login', (): void => {
+
+    let button: any;
+    let emailInput : HTMLInputElement;
+    let passwordInput : HTMLInputElement;
+
+    const setupForm = async (values?: { email: string }): Promise<void> => {
+        await setup('/login');
+        emailInput = screen.getByLabelText('Email');
+        passwordInput = screen.getByLabelText('Password');
+        await userEvent.type(emailInput, values?.email || testUser.email);
+        await userEvent.type(passwordInput, testUser.password);
+        button = screen.getByRole('button', { name: 'Login' });
+    };
+
+    it('Navigates to home after successful login', async (): Promise<void> => {
+        await setupForm();
+        await userEvent.click(button);
+        const homePage = await screen.findByTestId('home-page');
+        expect(homePage).toBeInTheDocument();
+    });
+
 });

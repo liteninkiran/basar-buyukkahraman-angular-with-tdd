@@ -383,10 +383,9 @@ describe('SignUpComponent', () => {
             input.dispatchEvent(new Event('input'));
             input.dispatchEvent(new Event('blur'));
             const request = httpTestingController.expectOne(({ url, method, body }) => {
-                if (url === '/api/1.0/user/email' && method === 'POST') {
-                    return body.email === "non-unique-email@mail.com"
-                }
-                return false;
+                return (url === '/api/1.0/user/email' && method === 'POST')
+                    ? body.email === 'non-unique-email@mail.com'
+                    : false;
             })
             request.flush({});
             fixture.detectChanges();
