@@ -23,6 +23,25 @@ describe('AppComponent', () => {
     let httpTestingController: HttpTestingController;
     let location: Location;
 
+    const testUser = {
+        password: 'P4ssword',
+        email: 'user1@mail.com',
+    }
+    const selectors = {
+        email: {
+            label: 'label[for="email"]',
+            input: 'input[id="email"]',
+        },
+        password: {
+            label: 'label[for="password"]',
+            input: 'input[id="password"]',
+        },
+        h1: 'h1',
+        status: 'span[role="status"]',
+        alert: '.alert',
+        homePage: '[data-testid="home-page"]',
+    }
+
     beforeEach(async (): Promise<void> => {
         await TestBed.configureTestingModule({
             declarations: [
@@ -130,6 +149,44 @@ describe('AppComponent', () => {
             const page = appComponent.querySelector(selector);
             expect(page).toBeTruthy();
             expect(location.path()).toEqual('/user/1');
+        }));
+    });
+
+    describe('Login', (): void => {
+
+        let button: any;
+        let httpTestingController: HttpTestingController;
+        let loginPage: HTMLElement;
+        let emailInput: HTMLInputElement;
+        let passwordInput: HTMLInputElement;
+
+        const setupForm = async (email = testUser.email): Promise<void> => {
+            httpTestingController = TestBed.inject(HttpTestingController);
+            loginPage = fixture.nativeElement as HTMLElement;
+            await fixture.whenStable();
+            emailInput = loginPage.querySelector(selectors.email.input) as HTMLInputElement;
+            passwordInput = loginPage.querySelector(selectors.password.input) as HTMLInputElement;
+            console.log();
+            emailInput.value = email;
+            emailInput.dispatchEvent(new Event('input'));
+            emailInput.dispatchEvent(new Event('blur'));
+            passwordInput.value = testUser.password;
+            passwordInput.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+            button = loginPage.querySelector('button');
+        }
+
+        it('Navigates to home after successful login', fakeAsync(async (): Promise<void> => {
+            await router.navigate(['/login']);
+            fixture.detectChanges();
+            await setupForm();
+            button.click();
+            const request = httpTestingController.expectOne(() => true);
+            request.flush({});
+            fixture.detectChanges();
+            tick();
+            const page = appComponent.querySelector(selectors.homePage);
+            expect(page).toBeTruthy();
         }));
     });
 });

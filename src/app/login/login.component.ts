@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from '../core/user.service';
 import { FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-login',
@@ -18,7 +19,10 @@ export class LoginComponent implements OnInit {
     public error = '';
     public apiProgress = false;
 
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService,
+        private router: Router,
+    ) { }
 
     public ngOnInit(): void {
     }
@@ -36,7 +40,7 @@ export class LoginComponent implements OnInit {
             .authenticate(this.email, this.password)
             .subscribe({
                 next: () => {
-
+                    this.router.navigate(['/']);
                 },
                 error: (err: HttpErrorResponse) => {
                     this.error = err.error.message;
