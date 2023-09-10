@@ -26,6 +26,8 @@ import { rest } from 'msw';
 // Types & Interfaces
 import { LoggedInUser } from './shared/types';
 
+let logoutCounter = 0;
+
 const testUser = {
     username: 'user1',
     password: 'P4ssword',
@@ -41,6 +43,7 @@ const tokenUrl = '/api/1.0/users/token/:token';
 const usersUrl = '/api/1.0/users';
 const userUrl = '/api/1.0/users/:id';
 const authUrl = '/api/1.0/auth';
+const logoutUrl = '/api/1.0/logout';
 const tokenResolver = (req: any, res: any, ctx: any) => res(ctx.status(200));
 const usersResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json(data));
 const userResolver = (req: any, res: any, ctx: any) => {
@@ -52,14 +55,22 @@ const userResolver = (req: any, res: any, ctx: any) => {
     }));
 }
 const authResolver = (req: any, res: any, ctx: any) => res(ctx.status(200), ctx.json({ id: 1, username: testUser.username }));
+const logoutResolver = (req: any, res: any, ctx: any) => {
+    logoutCounter += 1;
+    return res(ctx.status(200));
+};
 
 const tokenHandler = rest.post(tokenUrl, tokenResolver);
 const usersHandler = rest.get(usersUrl, usersResolver);
 const userHandler = rest.get(userUrl, userResolver);
 const authHandler = rest.post(authUrl, authResolver);
-const server = setupServer(tokenHandler, usersHandler, userHandler, authHandler);
+const logoutHandler = rest.post(logoutUrl, logoutResolver);
+const server = setupServer(tokenHandler, usersHandler, userHandler, authHandler, logoutHandler);
 
-beforeEach((): void => server.resetHandlers());
+beforeEach((): void => {
+    server.resetHandlers();
+    logoutCounter = 0;
+});
 beforeAll((): void => server.listen());
 afterAll((): void => server.close());
 afterEach((): void => localStorage.clear());
@@ -196,7 +207,7 @@ describe('Login', (): void => {
         expect(header).toBeInTheDocument();
     });
 
-    it('Stores logged in state in local storage', async () => {
+    it('Stores logged in state in local storage', async (): Promise<void> => {
         await setupForm();
         await userEvent.click(button);
         await screen.findByTestId('home-page');
@@ -204,10 +215,48 @@ describe('Login', (): void => {
         expect(state.isLoggedIn).toBe(true);
     });
     
-    it('Displays layout of logged in user', async () => {
+    it('Displays layout of logged in user', async (): Promise<void> => {
         localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true }))
         await setup('/');
         const myProfileLink = await screen.findByRole('link', { name: 'My Profile'})
         expect(myProfileLink).toBeInTheDocument();
+    });
+
+    it('Displays Logout link on nav bar after successful login', async (): Promise<void> => {
+        await setupForm();
+        expect(screen.queryByText('Logout')).not.toBeInTheDocument();
+        await userEvent.click(button);
+        const logoutLink = await screen.findByText('Logout')
+        expect(logoutLink).toBeInTheDocument();
+    });
+
+    it('Displays Login and Sign Up after clicking Logout', async (): Promise<void> => {
+        await setupForm();
+        await userEvent.click(button);
+        const logoutLink = await screen.findByText('Logout')
+        await userEvent.click(logoutLink);
+        const loginLink = await screen.findByRole('link', { name: 'Login'})
+        expect(loginLink).toBeInTheDocument();
+        const signUpLink = await screen.findByRole('link', { name: 'Sign Up'})
+        expect(signUpLink).toBeInTheDocument();
+    });
+    
+      it('Clears storage after user logs out', async (): Promise<void> => {
+        await setupForm();
+        await userEvent.click(button);
+        const logoutLink = await screen.findByText('Logout')
+        await userEvent.click(logoutLink);
+        await screen.findByRole('link', { name: 'Login'})
+        const state = localStorage.getItem('auth');
+        expect(state).toBeNull();
+    });
+    
+      it('Sends logout request to backend', async (): Promise<void> => {
+        await setupForm();
+        await userEvent.click(button);
+        const logoutLink = await screen.findByText('Logout')
+        await userEvent.click(logoutLink);
+        await screen.findByRole('link', { name: 'Login'})
+        expect(logoutCounter).toBe(1);
     });
 });
