@@ -1,19 +1,27 @@
+// Angular
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+
+// Modules
 import { SharedModule } from './shared/shared.module';
+import { routes } from './router/app-router.module';
+
+// Components
 import { AppComponent } from './app.component';
 import { SignUpComponent } from './sign-up/sign-up.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { ActivateComponent } from './activate/activate.component';
-import { routes } from './router/app-router.module';
 import { UserComponent } from './user/user.component';
 import { UserListComponent } from './home/user-list/user-list.component';
-import { Location } from '@angular/common';
 import { UserListItemComponent } from './home/user-list-item/user-list-item.component';
+
+// Types & Interfaces
+import { LoggedInUser } from './shared/types';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -50,7 +58,7 @@ describe('AppComponent', () => {
         userListItem: '.list-group-item',
     }
 
-    beforeEach(async (): Promise<void> => {
+    const setup = async (): Promise<void> => {
         await TestBed.configureTestingModule({
             declarations: [
                 AppComponent,
@@ -70,9 +78,7 @@ describe('AppComponent', () => {
                 FormsModule,
             ],
         }).compileComponents();
-    });
 
-    beforeEach((): void => {
         fixture = TestBed.createComponent(AppComponent);
         router = TestBed.inject(Router);
         location = TestBed.inject(Location);
@@ -80,6 +86,10 @@ describe('AppComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
         appComponent = fixture.nativeElement;
+    }
+
+    afterEach((): void => {
+        localStorage.clear();
     });
 
     describe('Routing', (): void => {
@@ -109,6 +119,7 @@ describe('AppComponent', () => {
         // Displays correct pageId for each path
         tests.routing.forEach(({ path, pageId }): void => {
             it(`Displays '${pageId}' when path is '${path}'`, async (): Promise<void> => {
+                await setup();
                 await router.navigate([path]);
                 fixture.detectChanges();
                 const page = appComponent.querySelector(`[data-testid="${pageId}"]`);
@@ -119,6 +130,7 @@ describe('AppComponent', () => {
         // Has link with correct title for each path
         tests.link.forEach(({ path, title }): void => {
             it(`Has link with title '${title}' to '${path}'`, async (): Promise<void> => {
+                await setup();
                 const linkElement: HTMLAnchorElement = appComponent.querySelector(`a[title="${title}"]`) as HTMLAnchorElement;
                 expect(linkElement.pathname).toEqual(path);
             });
@@ -127,6 +139,7 @@ describe('AppComponent', () => {
         // Displays correct page after clicking each link
         tests.navigation.forEach(({ initialPath, clickingTo, visiblePage }): void => {
             it(`Displays '${visiblePage}' after clicking '${clickingTo}' link`, fakeAsync(async (): Promise<void> => {
+                await setup();
                 await router.navigate([initialPath]);
                 const linkElement: HTMLAnchorElement = appComponent.querySelector(`a[title="${clickingTo}"]`) as HTMLAnchorElement;
                 linkElement.click();
@@ -138,6 +151,7 @@ describe('AppComponent', () => {
         });
 
         it('Navigates to the user page when clicking the username on user list', fakeAsync(async (): Promise<void> => {
+            await setup();
             await router.navigate(['/']);
             fixture.detectChanges();
             const request = httpTestingController.expectOne(() => true);
@@ -167,11 +181,13 @@ describe('AppComponent', () => {
         let passwordInput: HTMLInputElement;
 
         const setupLogin = fakeAsync(async (): Promise<void> => {
-            httpTestingController = TestBed.inject(HttpTestingController);
-
             // Navigate to login page
+            await setup();
             await router.navigate(['/login']);
             fixture.detectChanges();
+
+            // Allows for mocking and flushing of requests.
+            httpTestingController = TestBed.inject(HttpTestingController);
 
             // Wait for login form to be ready
             loginPage = fixture.nativeElement as HTMLElement;
@@ -239,6 +255,21 @@ describe('AppComponent', () => {
             const page = appComponent.querySelector(selectors.userPage);
             expect(page).toBeTruthy();
             expect(location.path()).toEqual('/user/1');
+        });
+
+        it('Stores logged in state in local storage', async (): Promise<void> => {
+            await setupLogin();
+            const state = JSON.parse(localStorage.getItem('auth')!) as LoggedInUser;
+            expect(state.isLoggedIn).toBe(true);
+        });
+      
+        it('Displays layout of logged in user', async (): Promise<void> => {
+            localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true}));
+            await setup();
+            await router.navigate(['/']);
+            fixture.detectChanges();
+            const myProfileLink = appComponent.querySelector(selectors.links.myProfile);
+            expect(myProfileLink).toBeTruthy();
         });
     });
 });
