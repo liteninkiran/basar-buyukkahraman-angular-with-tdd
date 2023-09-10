@@ -23,6 +23,9 @@ import { routes } from './router/app-router.module';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 
+// Types & Interfaces
+import { LoggedInUser } from './shared/types';
+
 const testUser = {
     username: 'user1',
     password: 'P4ssword',
@@ -59,6 +62,7 @@ const server = setupServer(tokenHandler, usersHandler, userHandler, authHandler)
 beforeEach((): void => server.resetHandlers());
 beforeAll((): void => server.listen());
 afterAll((): void => server.close());
+afterEach((): void => localStorage.clear());
 
 const setup = async (path: string): Promise<void> => {
     const { navigate } = await render(AppComponent, {
@@ -172,7 +176,7 @@ describe('Login', (): void => {
         await userEvent.click(button);
         await waitForElementToBeRemoved(loginLink);
         expect(signUpLink).not.toBeInTheDocument();
-    })
+    });
 
     it('Displays My Profile link on navbar after successful login', async (): Promise<void> => {
         await setupForm();
@@ -180,7 +184,7 @@ describe('Login', (): void => {
         await userEvent.click(button);
         const myProfileLink = await screen.findByRole('link', { name: 'My Profile' })
         expect(myProfileLink).toBeInTheDocument();
-    })
+    });
 
     it('Displays User Page with logged in user ID in the URL after clicking My Profile link on navbar', async (): Promise<void> => {
         await setupForm();
@@ -190,5 +194,20 @@ describe('Login', (): void => {
         await screen.findByTestId('user-page');
         const header = await screen.findByRole('heading', { name: testUser.username });
         expect(header).toBeInTheDocument();
-    })
+    });
+
+    it('Stores logged in state in local storage', async () => {
+        await setupForm();
+        await userEvent.click(button);
+        await screen.findByTestId('home-page');
+        const state = JSON.parse(localStorage.getItem('auth')!) as LoggedInUser;
+        expect(state.isLoggedIn).toBe(true);
+    });
+    
+    it('Displays layout of logged in user', async () => {
+        localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true }))
+        await setup('/');
+        const myProfileLink = await screen.findByRole('link', { name: 'My Profile'})
+        expect(myProfileLink).toBeInTheDocument();
+    });
 });
