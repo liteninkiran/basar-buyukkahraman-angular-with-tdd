@@ -1,7 +1,7 @@
 // Angular
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { render, screen } from '@testing-library/angular';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
 
 // Components
@@ -12,6 +12,8 @@ import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { ActivateComponent } from './activate/activate.component';
 import { UserListComponent } from './home/user-list/user-list.component';
+import { UserListItemComponent } from './home/user-list-item/user-list-item.component';
+import { ProfileCardComponent } from './user/profile-card/profile-card.component';
 
 // Modules
 import { SharedModule } from './shared/shared.module';
@@ -20,7 +22,6 @@ import { routes } from './router/app-router.module';
 // MSW
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import { UserListItemComponent } from './home/user-list-item/user-list-item.component';
 
 const testUser = {
     username: 'user1',
@@ -69,6 +70,7 @@ const setup = async (path: string): Promise<void> => {
             ActivateComponent,
             UserListComponent,
             UserListItemComponent,
+            ProfileCardComponent,
         ],
         imports: [
             HttpClientModule,
@@ -148,15 +150,11 @@ describe('Routing', (): void => {
 describe('Login', (): void => {
 
     let button: any;
-    let emailInput : HTMLInputElement;
-    let passwordInput : HTMLInputElement;
 
-    const setupForm = async (values?: { email: string }): Promise<void> => {
+    const setupForm = async (): Promise<void> => {
         await setup('/login');
-        emailInput = screen.getByLabelText('Email');
-        passwordInput = screen.getByLabelText('Password');
-        await userEvent.type(emailInput, values?.email || testUser.email);
-        await userEvent.type(passwordInput, testUser.password);
+        await userEvent.type(screen.getByLabelText('Email'), testUser.email);
+        await userEvent.type(screen.getByLabelText('Password'), testUser.password);
         button = screen.getByRole('button', { name: 'Login' });
     };
 
@@ -167,4 +165,30 @@ describe('Login', (): void => {
         expect(homePage).toBeInTheDocument();
     });
 
+    it('Hides Login and Sign Up from navbar after successful login', async (): Promise<void> => {
+        await setupForm();
+        const loginLink = screen.getByRole('link', { name: 'Login' });
+        const signUpLink = screen.getByRole('link', { name: 'Login' });
+        await userEvent.click(button);
+        await waitForElementToBeRemoved(loginLink);
+        expect(signUpLink).not.toBeInTheDocument();
+    })
+
+    it('Displays My Profile link on navbar after successful login', async (): Promise<void> => {
+        await setupForm();
+        expect(screen.queryByRole('link', { name: 'My Profile' })).not.toBeInTheDocument();
+        await userEvent.click(button);
+        const myProfileLink = await screen.findByRole('link', { name: 'My Profile' })
+        expect(myProfileLink).toBeInTheDocument();
+    })
+
+    it('Displays User Page with logged in user ID in the URL after clicking My Profile link on navbar', async (): Promise<void> => {
+        await setupForm();
+        await userEvent.click(button);
+        const myProfileLink = await screen.findByRole('link', { name: 'My Profile' })
+        await userEvent.click(myProfileLink);
+        await screen.findByTestId('user-page');
+        const header = await screen.findByRole('heading', { name: testUser.username });
+        expect(header).toBeInTheDocument();
+    })
 });
