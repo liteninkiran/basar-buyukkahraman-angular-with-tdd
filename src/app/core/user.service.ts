@@ -40,4 +40,8 @@ export class UserService {
     public authenticate(email: string, password: string): Observable<any> {
         return this.httpClient.post('/api/1.0/auth', { email, password });
     }
+
+    public logout(): Observable<any> {
+        return this.httpClient.post('/api/1.0/logout', {});
+    }
 }

@@ -51,6 +51,7 @@ describe('AppComponent', () => {
         homePage: '[data-testid="home-page"]',
         userPage: '[data-testid="user-page"]',
         links: {
+            logout: 'span[title="Logout"]',
             login: 'a[title="Login"]',
             signUp: 'a[title="Sign Up"]',
             myProfile: 'a[title="My Profile"]',
@@ -156,7 +157,7 @@ describe('AppComponent', () => {
             fixture.detectChanges();
             const request = httpTestingController.expectOne(() => true);
             request.flush({
-                content: [ { id: 1, username: testUser.username, email: testUser.email } ],
+                content: [{ id: 1, username: testUser.username, email: testUser.email }],
                 page: 0,
                 size: 3,
                 totalPages: 1,
@@ -179,6 +180,8 @@ describe('AppComponent', () => {
         let loginPage: HTMLElement;
         let emailInput: HTMLInputElement;
         let passwordInput: HTMLInputElement;
+
+        const logoutUrl = '/api/1.0/logout';
 
         const setupLogin = fakeAsync(async (): Promise<void> => {
             // Navigate to login page
@@ -262,14 +265,48 @@ describe('AppComponent', () => {
             const state = JSON.parse(localStorage.getItem('auth')!) as LoggedInUser;
             expect(state.isLoggedIn).toBe(true);
         });
-      
+
         it('Displays layout of logged in user', async (): Promise<void> => {
-            localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true}));
+            localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true }));
             await setup();
             await router.navigate(['/']);
             fixture.detectChanges();
             const myProfileLink = appComponent.querySelector(selectors.links.myProfile);
             expect(myProfileLink).toBeTruthy();
+        });
+
+        it('Displays Logout link on navbar after successful login', async (): Promise<void> => {
+            await setupLogin();
+            const logoutLink = appComponent.querySelector(selectors.links.logout) as HTMLAnchorElement;
+            expect(logoutLink).toBeTruthy();
+        });
+
+        it('Displays Login and Sign Up after clicking Logout', async (): Promise<void> => {
+            await setupLogin();
+            const logoutLink = appComponent.querySelector(selectors.links.logout) as HTMLSpanElement;
+            logoutLink.click();
+            fixture.detectChanges();
+            const loginLink = appComponent.querySelector(selectors.links.login) as HTMLAnchorElement;
+            const signUpLink = appComponent.querySelector(selectors.links.signUp) as HTMLAnchorElement;
+            expect(loginLink).toBeTruthy();
+            expect(signUpLink).toBeTruthy();
+        });
+
+        it('Clears storage after user logs out', async (): Promise<void> => {
+            await setupLogin();
+            const logoutLink = appComponent.querySelector(selectors.links.logout) as HTMLSpanElement;
+            logoutLink.click();
+            fixture.detectChanges();
+            const state = localStorage.getItem('auth');
+            expect(state).toBeNull();
+        });
+
+        it('Sends logout request to backend', async (): Promise<void> => {
+            await setupLogin();
+            const logoutLink = appComponent.querySelector(selectors.links.logout) as HTMLSpanElement;
+            logoutLink.click();
+            const request = httpTestingController.expectOne(logoutUrl);
+            expect(request).not.toBeNull();
         });
     });
 });
